@@ -3,13 +3,12 @@
 import Navbar from "@/components/Navbar";
 import HeaderSection from "@/components/HeaderSection";
 import Footer from "@/components/Footer";
+import SolanaDemo from "@/components/SolanaDemo";
 import Link from "next/link";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-white text-black flex flex-col">
-      <Navbar />
-
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:py-10 space-y-6">
         <HeaderSection />
 
@@ -44,6 +43,9 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* Solana Demo */}
+        <SolanaDemo />
 
         {/* Overview Juzly */}
         <section className="rounded-xl border border-black/10 bg-white p-6 shadow-sm">

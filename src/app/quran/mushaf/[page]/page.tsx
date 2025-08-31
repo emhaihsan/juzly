@@ -29,6 +29,8 @@ export async function generateMetadata({ params }: Props) {
   return { title: `Juzly - Mushaf Page ${pageNum}` };
 }
 
+import ReadTimer from "@/components/ReadTimer";
+
 export default async function MushafPage({ params }: Props) {
   const { page } = await params;
   const pageNum = Math.max(1, Math.min(604, Number(page) || 1));
@@ -100,7 +102,7 @@ export default async function MushafPage({ params }: Props) {
           </a>
         </div>
       </div>
-
+      <ReadTimer page={pageNum} />
       <div className="space-y-4">
         {items.map((v) => (
           <div
