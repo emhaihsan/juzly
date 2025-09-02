@@ -3,17 +3,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useWeb3AuthConnect } from "@web3auth/modal/react";
 import { useSolanaWallet } from "@web3auth/modal/react/solana";
-import { MERCHANDISE_CATALOG, formatJuzAmount } from "@/lib/juz-token";
-
-// Mock JUZ balance for demo (in production, fetch from blockchain)
-function getMockJuzBalance(pubkey: string): number {
-  const saved = localStorage.getItem(`juz_balance_${pubkey}`);
-  return saved ? parseInt(saved) : 150_000_000; // 150 JUZ default
-}
-
-function setMockJuzBalance(pubkey: string, amount: number) {
-  localStorage.setItem(`juz_balance_${pubkey}`, amount.toString());
-}
+import { MERCHANDISE_CATALOG } from "@/lib/merchandise";
+import { formatJuzAmount, getUserJuzBalance } from "@/lib/juz-token";
+import { PublicKey } from "@solana/web3.js";
 
 export default function MarketplacePage() {
   const { isConnected } = useWeb3AuthConnect();
@@ -21,14 +13,29 @@ export default function MarketplacePage() {
   const pubkey = accounts?.[0] || null;
 
   const [juzBalance, setJuzBalance] = useState(0);
+  const [balanceLoading, setBalanceLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [redeeming, setRedeeming] = useState<string | null>(null);
 
   useEffect(() => {
-    if (pubkey) {
-      setJuzBalance(getMockJuzBalance(pubkey));
-    }
-  }, [pubkey]);
+    const fetchJuzBalance = async () => {
+      if (pubkey && isConnected) {
+        setBalanceLoading(true);
+        try {
+          const publicKey = new PublicKey(pubkey);
+          const balance = await getUserJuzBalance(publicKey);
+          setJuzBalance(balance);
+        } catch (error) {
+          console.error("Error fetching JUZ balance:", error);
+          setJuzBalance(0);
+        } finally {
+          setBalanceLoading(false);
+        }
+      }
+    };
+
+    fetchJuzBalance();
+  }, [pubkey, isConnected]);
 
   const categories = ["all", "digital", "physical", "charity"];
 
@@ -55,7 +62,7 @@ export default function MarketplacePage() {
 
       const newBalance = juzBalance - price;
       setJuzBalance(newBalance);
-      setMockJuzBalance(pubkey, newBalance);
+      // Removed setMockJuzBalance call as it's not needed with real blockchain balance
 
       alert(`Successfully redeemed! Transaction ID: redemption_${Date.now()}`);
     } catch (error) {

@@ -128,30 +128,19 @@ export default function ReadTimer({ page }: { page: number }) {
     return visible.current && intersection.current >= 0.7 && fresh;
   }, []);
 
-  // Check if page is already completed
+  // Check if page can be claimed (allow multiple times per day)
   useEffect(() => {
-    if (pubkey) {
-      const pagesRead = getPagesRead(pubkey);
-      setPageCompleted(pagesRead.includes(page));
-      setClaimed(pagesRead.includes(page)); // If page completed, mark as claimed
-    }
+    // Remove the page completion check - allow repeat reading for rewards
+    setPageCompleted(false);
+    setClaimed(false);
   }, [pubkey, page]);
 
-  // Reset timer when page changes
+  // Reset timer when page changes - allow fresh start each time
   useEffect(() => {
     setSeconds(0);
     setClaimed(false);
-    if (pubkey) {
-      const pagesRead = getPagesRead(pubkey);
-      setPageCompleted(pagesRead.includes(page));
-      setClaimed(pagesRead.includes(page));
-    }
+    setPageCompleted(false);
   }, [page, pubkey]);
-
-  // Load initial progress
-  useEffect(() => {
-    setSeconds(getProgress());
-  }, []);
 
   // Track visibility
   useEffect(() => {
@@ -213,54 +202,65 @@ export default function ReadTimer({ page }: { page: number }) {
       alert(`Minimum ${minReadingTime} seconds required to claim this page.`);
       return;
     }
-    if (claimed || pageCompleted) {
-      alert("This page has already been claimed.");
+    if (claimed) {
+      alert(
+        "This page session has already been claimed. Read another page or refresh to read again."
+      );
       return;
     }
 
     setClaiming(true);
     try {
       const current = getBalance(pubkey);
-      // New tokenomics: 1/20 JUZ token per page completion (50,000 tokens)
-      const pageReward = Math.floor(1_000_000 / 20); // 50,000 tokens per page
+      // Reading reward: 1 JUZ token per minute of reading
+      const timeReward = Math.floor((seconds / 60) * 1_000_000); // 1 JUZ per minute
+
+      // Page completion bonus
+      const pageBonus = 500_000; // 0.5 JUZ for completing any page
 
       // Special page bonuses
-      let bonus = 0;
-      if (page === 1) bonus = 100_000; // 0.1 JUZ bonus for Al-Fatihah
-      if (page === 604) bonus = 1_000_000; // 1 JUZ bonus for completing Quran
+      let specialBonus = 0;
+      if (page === 1) specialBonus = 2_000_000; // 2 JUZ bonus for Al-Fatihah
+      if (page === 2) specialBonus = 1_500_000; // 1.5 JUZ bonus for start of Al-Baqarah
+      if (page === 604) specialBonus = 5_000_000; // 5 JUZ bonus for completing Quran
 
-      const totalReward = pageReward + bonus;
+      const totalReward = timeReward + pageBonus + specialBonus;
       setBalance(pubkey, current + totalReward);
       setClaimed(true);
-
-      // Mark page as completed
-      addPageRead(pubkey, page);
       setPageCompleted(true);
+
+      // Track this reading session (not permanent page completion)
+      const pagesRead = getPagesRead(pubkey);
+      addPageRead(pubkey, page); // Track for statistics
       updateWeeklyProgress(pubkey, 1);
       updateMonthlyProgress(pubkey, 1);
 
-      // Check for NFT eligibility
-      const pagesRead = getPagesRead(pubkey);
-      const isNftEligible = pagesRead.length > 0 && pagesRead.length % 7 === 0; // Every 7 pages
+      // Check for NFT eligibility (every 10 pages read)
+      const totalPagesReadThisSession = pagesRead.length + 1;
+      const isNftEligible =
+        totalPagesReadThisSession > 0 && totalPagesReadThisSession % 10 === 0;
 
       pushHistory({
         ts: Date.now(),
         minutes: Math.floor(seconds / 60),
         page,
-        note: "page-completed",
+        note: `reading-session-${totalReward}`,
         nftEligible: isNftEligible,
       });
 
       if (isNftEligible) {
         alert(
-          `🎉 Congratulations! You have completed ${pagesRead.length} pages and are eligible for NFT rewards!`
+          `🎁 NFT Reward Available! You've completed ${totalPagesReadThisSession} reading sessions and earned a special NFT!`
         );
       }
 
       alert(
-        `✅ Success! You earned ${(totalReward / 1_000_000).toFixed(
-          3
-        )} JUZ tokens for page ${page}!`
+        `🎉 Reading Rewards Earned!\n\n` +
+          `⏱️ Time Reward: ${(timeReward / 1_000_000).toFixed(2)} JUZ\n` +
+          `📄 Page Bonus: ${(pageBonus / 1_000_000).toFixed(2)} JUZ\n` +
+          `⭐ Special Bonus: ${(specialBonus / 1_000_000).toFixed(2)} JUZ\n` +
+          `💰 Total: ${(totalReward / 1_000_000).toFixed(2)} JUZ tokens\n\n` +
+          `Go to Rewards page to mint these tokens to blockchain!`
       );
     } finally {
       setClaiming(false);
@@ -322,28 +322,24 @@ export default function ReadTimer({ page }: { page: number }) {
       <div className="mt-3 flex gap-2">
         <button
           onClick={doClaim}
-          disabled={
-            claiming || !isConnected || !pubkey || claimed || pageCompleted
-          }
+          disabled={claiming || !isConnected || !pubkey || claimed}
           className="rounded-md border border-black px-3 py-1.5 text-sm hover:bg-black hover:text-white disabled:opacity-50 transition-colors"
         >
           {claiming
             ? "Claiming..."
-            : claimed || pageCompleted
-            ? "Already Claimed"
-            : "Claim JUZ Token"}
+            : claimed
+            ? "Claimed This Session"
+            : seconds >= minReadingTime
+            ? "Claim JUZ Rewards"
+            : `Read ${Math.ceil(
+                (minReadingTime - seconds) / 60
+              )}+ min to claim`}
         </button>
         <Link
           href="/rewards"
-          className="rounded-md border border-black px-3 py-1.5 text-sm hover:bg-black hover:text-white transition-colors"
+          className="rounded-md border border-blue-600 text-blue-600 px-3 py-1.5 text-sm hover:bg-blue-600 hover:text-white transition-colors"
         >
-          My Rewards
-        </Link>
-        <Link
-          href="/marketplace"
-          className="rounded-md border border-green-600 text-green-600 px-3 py-1.5 text-sm hover:bg-green-600 hover:text-white transition-colors"
-        >
-          Marketplace
+          My Rewards ({(getBalance(pubkey || "") / 1_000_000).toFixed(1)} JUZ)
         </Link>
       </div>
     </div>

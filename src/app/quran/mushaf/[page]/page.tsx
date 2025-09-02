@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ReadTimer from "@/components/ReadTimer";
+import NavigationButtons from "@/components/NavigationButtons";
 
 interface Props {
   params: Promise<{ page: string }>;
@@ -85,28 +86,12 @@ export default async function MushafPage({ params }: Props) {
               </p>
             )}
           </div>
-          <div className="flex items-center gap-2">
-            <Link
-              href={prev ? `/quran/mushaf/${prev}` : "#"}
-              className={`inline-flex items-center rounded-md border px-3 py-1.5 text-sm transition-colors ${
-                prev
-                  ? "border-black hover:bg-black hover:text-white"
-                  : "border-black/20 text-black/40 cursor-not-allowed pointer-events-none"
-              }`}
-            >
-              Prev
-            </Link>
-            <Link
-              href={next ? `/quran/mushaf/${next}` : "#"}
-              className={`inline-flex items-center rounded-md border px-3 py-1.5 text-sm transition-colors ${
-                next
-                  ? "border-black hover:bg-black hover:text-white"
-                  : "border-black/20 text-black/40 cursor-not-allowed pointer-events-none"
-              }`}
-            >
-              Next
-            </Link>
-          </div>
+          {/* Navigation with claim functionality */}
+          <NavigationButtons
+            currentPage={pageNum}
+            prevPage={prev}
+            nextPage={next}
+          />
         </div>
         <ReadTimer page={pageNum} />
         <div className="space-y-4">

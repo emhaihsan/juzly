@@ -9,21 +9,30 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   getAssociatedTokenAddress
 } from '@solana/spl-token';
+import { 
+  getJuzMintAddress, 
+  getJuzDecimals, 
+  formatJuzTokenAmount, 
+  parseJuzTokenAmount,
+  JUZ_DEPLOYMENT_CONFIG 
+} from './deployment-config';
 
-// JUZ Token Configuration
+// JUZ Token Configuration using deployed token
 export const JUZ_TOKEN_CONFIG = {
   name: 'Juzly Reading Token',
   symbol: 'JUZ',
-  decimals: 6,
+  decimals: getJuzDecimals(),
   description: 'Reward token for reading the Holy Quran on Juzly platform',
-  image: 'https://arweave.net/juz-token-logo.png'
+  image: 'https://arweave.net/juz-token-logo.png',
+  mintAddress: getJuzMintAddress().toString(),
+  explorer: JUZ_DEPLOYMENT_CONFIG.explorer
 };
 
 // Reading reward rates (JUZ tokens per activity)
 export const READING_REWARDS = {
   // Base reading rewards
-  PER_MINUTE_READING: 1_000_000, // 1 JUZ per minute (with 6 decimals)
-  PAGE_COMPLETION_BONUS: 500_000, // 0.5 JUZ bonus for completing a page
+  PER_MINUTE_READING: parseJuzTokenAmount(1), // 1 JUZ per minute
+  PAGE_COMPLETION_BONUS: parseJuzTokenAmount(0.5), // 0.5 JUZ bonus for completing a page
   
   // Streak bonuses (multipliers)
   DAILY_STREAK_BONUS: {
@@ -34,355 +43,39 @@ export const READING_REWARDS = {
   
   // Special page bonuses
   SPECIAL_PAGES: {
-    1: 2_000_000,    // 2 JUZ for Al-Fatihah (page 1)
-    2: 1_500_000,    // 1.5 JUZ for start of Al-Baqarah
-    604: 5_000_000,  // 5 JUZ for completing Quran (last page)
+    1: parseJuzTokenAmount(2),    // 2 JUZ for Al-Fatihah (page 1)
+    2: parseJuzTokenAmount(1.5),  // 1.5 JUZ for start of Al-Baqarah
+    604: parseJuzTokenAmount(5),  // 5 JUZ for completing Quran (last page)
   },
   
   // Achievement bonuses
   ACHIEVEMENT_BONUS: {
-    first_week: 10_000_000,      // 10 JUZ
-    monthly_reader: 25_000_000,  // 25 JUZ
-    century_club: 100_000_000,   // 100 JUZ
-    diamond_reader: 300_000_000, // 300 JUZ
-    quran_complete: 1_000_000_000, // 1000 JUZ
+    first_week: parseJuzTokenAmount(10),      // 10 JUZ
+    monthly_reader: parseJuzTokenAmount(25),  // 25 JUZ
+    century_club: parseJuzTokenAmount(100),   // 100 JUZ
+    diamond_reader: parseJuzTokenAmount(300), // 300 JUZ
+    quran_complete: parseJuzTokenAmount(1000), // 1000 JUZ
   },
   
-  // Leaderboard rewards (weekly/monthly)
-  LEADERBOARD_REWARDS: {
-    weekly: [50_000_000, 30_000_000, 20_000_000], // Top 3: 50, 30, 20 JUZ
-    monthly: [200_000_000, 150_000_000, 100_000_000], // Top 3: 200, 150, 100 JUZ
+  // Leaderboard rewards (weekly)
+  LEADERBOARD_WEEKLY: {
+    1: parseJuzTokenAmount(50),   // 1st place: 50 JUZ
+    2: parseJuzTokenAmount(30),   // 2nd place: 30 JUZ
+    3: parseJuzTokenAmount(20),   // 3rd place: 20 JUZ
+    top10: parseJuzTokenAmount(5) // Top 10: 5 JUZ
   }
 };
-
-// Merchandise catalog with JUZ token prices
-export const MERCHANDISE_CATALOG = [
-  {
-    id: 'tasbih_digital',
-    name: 'Digital Tasbih Counter NFT',
-    description: 'Beautiful digital tasbih counter with Islamic patterns',
-    price: 50_000_000, // 50 JUZ
-    category: 'digital',
-    image: 'https://arweave.net/tasbih-nft.png',
-    stock: 1000
-  },
-  {
-    id: 'quran_bookmark',
-    name: 'Premium Quran Bookmark',
-    description: 'Physical bookmark with Ayatul Kursi calligraphy',
-    price: 25_000_000, // 25 JUZ
-    category: 'physical',
-    image: 'https://arweave.net/bookmark.png',
-    stock: 500,
-    shipping: true
-  },
-  {
-    id: 'prayer_mat_nft',
-    name: 'Virtual Prayer Mat Collection',
-    description: 'Collectible prayer mat designs from around the world',
-    price: 75_000_000, // 75 JUZ
-    category: 'digital',
-    image: 'https://arweave.net/prayer-mat-nft.png',
-    stock: 100
-  },
-  {
-    id: 'islamic_calendar',
-    name: 'Hijri Calendar 2025',
-    description: 'Beautiful Islamic calendar with daily Quran verses',
-    price: 40_000_000, // 40 JUZ
-    category: 'physical',
-    image: 'https://arweave.net/calendar.png',
-    stock: 200,
-    shipping: true
-  },
-  {
-    id: 'donation_voucher',
-    name: 'Charity Donation Voucher',
-    description: 'Donate to verified Islamic charities',
-    price: 10_000_000, // 10 JUZ (minimum)
-    category: 'charity',
-    image: 'https://arweave.net/donation.png',
-    stock: 9999,
-    customAmount: true
-  }
-];
-
-// Get JUZ token mint address from environment
-const JUZ_TOKEN_MINT = process.env.NEXT_PUBLIC_JUZ_TOKEN_MINT_ADDRESS;
-
-if (!JUZ_TOKEN_MINT) {
-  console.warn('⚠️ JUZ_TOKEN_MINT_ADDRESS not set in environment variables');
-}
 
 // Connection to Solana devnet
 export const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
 
-// JUZ Token mint public key
-export const juzTokenMint = JUZ_TOKEN_MINT ? new PublicKey(JUZ_TOKEN_MINT) : null;
-
-export class JuzTokenManager {
-  private connection: Connection;
-  private mintAddress: PublicKey | null = null;
-  private mintAuthority: Keypair | null = null;
-
-  constructor(rpcUrl?: string) {
-    this.connection = new Connection(rpcUrl || clusterApiUrl('devnet'));
-  }
-
-  // Set existing connection (for Web3Auth integration)
-  setConnection(connection: Connection) {
-    this.connection = connection;
-  }
-
-  // Initialize JUZ token mint (one-time setup)
-  async initializeToken(payer: Keypair): Promise<PublicKey> {
-    try {
-      // Create mint authority (in production, use a PDA)
-      this.mintAuthority = Keypair.generate();
-      
-      // Create the token mint
-      this.mintAddress = await createMint(
-        this.connection,
-        payer,
-        this.mintAuthority.publicKey,
-        null, // No freeze authority
-        JUZ_TOKEN_CONFIG.decimals,
-        undefined,
-        undefined,
-        TOKEN_PROGRAM_ID
-      );
-
-      console.log(`JUZ Token mint created: ${this.mintAddress.toString()}`);
-      return this.mintAddress;
-    } catch (error) {
-      console.error('Error initializing JUZ token:', error);
-      throw error;
-    }
-  }
-
-  // Set existing mint address (for already deployed token)
-  setMintAddress(mintAddress: string, mintAuthority?: Keypair) {
-    this.mintAddress = new PublicKey(mintAddress);
-    this.mintAuthority = mintAuthority || null;
-  }
-
-  // Get or create user's JUZ token account
-  async getUserTokenAccount(userPublicKey: PublicKey, payerKeypair?: Keypair) {
-    if (!this.mintAddress) {
-      throw new Error('Token mint not initialized');
-    }
-
-    try {
-      // For Web3Auth integration, we can't use the user's wallet as payer
-      // In production, you'd need a separate payer or use a different approach
-      if (payerKeypair) {
-        return await getOrCreateAssociatedTokenAccount(
-          this.connection,
-          payerKeypair,
-          this.mintAddress,
-          userPublicKey
-        );
-      } else {
-        // Alternative: Just get the associated token account address
-        // This won't create it if it doesn't exist, but works for balance checks
-        const associatedTokenAddress = await getAssociatedTokenAddress(
-          this.mintAddress,
-          userPublicKey
-        );
-        
-        try {
-          const accountInfo = await getAccount(this.connection, associatedTokenAddress);
-          return accountInfo;
-        } catch (error) {
-          // Account doesn't exist yet, return a mock structure for demo
-          console.log('Token account not found, user needs to initialize first');
-          throw new Error('Token account not initialized');
-        }
-      }
-    } catch (error) {
-      console.error('Error with token account:', error);
-      throw error;
-    }
-  }
-
-  // Get user's JUZ token balance
-  async getUserBalance(userPublicKey: PublicKey): Promise<number> {
-    try {
-      if (!this.mintAddress) {
-        console.log('Mint address not set, returning 0 balance');
-        return 0;
-      }
-
-      const associatedTokenAddress = await getAssociatedTokenAddress(
-        this.mintAddress,
-        userPublicKey
-      );
-      
-      const accountInfo = await getAccount(this.connection, associatedTokenAddress);
-      return Number(accountInfo.amount);
-    } catch (error) {
-      // Account doesn't exist or other error - return 0 for demo
-      console.log('Token balance check failed (account may not exist):', error);
-      return 0;
-    }
-  }
-
-  // Mint JUZ tokens for reading activity
-  async mintReadingReward(
-    userPublicKey: PublicKey,
-    rewardType: keyof typeof READING_REWARDS,
-    amount?: number,
-    multiplier: number = 1
-  ) {
-    if (!this.mintAddress || !this.mintAuthority) {
-      throw new Error('Token mint not initialized');
-    }
-
-    try {
-      const userTokenAccount = await this.getUserTokenAccount(userPublicKey);
-      
-      let rewardAmount: number;
-      if (amount) {
-        rewardAmount = amount;
-      } else if (rewardType in READING_REWARDS) {
-        rewardAmount = (READING_REWARDS as any)[rewardType];
-      } else {
-        throw new Error(`Unknown reward type: ${rewardType}`);
-      }
-
-      const finalAmount = Math.floor(rewardAmount * multiplier);
-
-      await mintTo(
-        this.connection,
-        this.mintAuthority, // This should be the payer in practice
-        this.mintAddress,
-        userTokenAccount.address,
-        this.mintAuthority,
-        finalAmount
-      );
-
-      return {
-        success: true,
-        amount: finalAmount,
-        userTokenAccount: userTokenAccount.address.toString(),
-      };
-    } catch (error) {
-      console.error('Error minting reading reward:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      };
-    }
-  }
-
-  // Calculate reading rewards based on activity
-  calculateReadingReward(
-    minutesRead: number,
-    pagesCompleted: number[],
-    streakDays: number,
-    achievements: string[] = []
-  ): number {
-    let totalReward = 0;
-
-    // Base reading reward
-    totalReward += minutesRead * READING_REWARDS.PER_MINUTE_READING;
-
-    // Page completion bonuses
-    pagesCompleted.forEach(page => {
-      totalReward += READING_REWARDS.PAGE_COMPLETION_BONUS;
-      
-      // Special page bonuses
-      if (page in READING_REWARDS.SPECIAL_PAGES) {
-        totalReward += (READING_REWARDS.SPECIAL_PAGES as any)[page];
-      }
-    });
-
-    // Streak multiplier
-    let streakMultiplier = 1;
-    if (streakDays >= 30) streakMultiplier = READING_REWARDS.DAILY_STREAK_BONUS[30];
-    else if (streakDays >= 14) streakMultiplier = READING_REWARDS.DAILY_STREAK_BONUS[14];
-    else if (streakDays >= 7) streakMultiplier = READING_REWARDS.DAILY_STREAK_BONUS[7];
-
-    totalReward *= streakMultiplier;
-
-    // Achievement bonuses
-    achievements.forEach(achievement => {
-      if (achievement in READING_REWARDS.ACHIEVEMENT_BONUS) {
-        totalReward += (READING_REWARDS.ACHIEVEMENT_BONUS as any)[achievement];
-      }
-    });
-
-    return Math.floor(totalReward);
-  }
-
-  // Redeem merchandise with JUZ tokens
-  async redeemMerchandise(
-    userPublicKey: PublicKey,
-    merchandiseId: string,
-    quantity: number = 1,
-    customAmount?: number
-  ) {
-    const item = MERCHANDISE_CATALOG.find(m => m.id === merchandiseId);
-    if (!item) {
-      throw new Error('Merchandise not found');
-    }
-
-    const userBalance = await this.getUserBalance(userPublicKey);
-    const totalCost = customAmount || (item.price * quantity);
-
-    if (userBalance < totalCost) {
-      throw new Error('Insufficient JUZ token balance');
-    }
-
-    if (!item.customAmount && item.stock < quantity) {
-      throw new Error('Insufficient stock');
-    }
-
-    try {
-      // In a real implementation, you would:
-      // 1. Burn/transfer tokens from user
-      // 2. Update merchandise stock
-      // 3. Create redemption record
-      // 4. Trigger fulfillment process
-
-      return {
-        success: true,
-        transactionId: `redemption_${Date.now()}`,
-        item: item.name,
-        quantity,
-        cost: totalCost,
-        remainingBalance: userBalance - totalCost,
-      };
-    } catch (error) {
-      console.error('Error redeeming merchandise:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      };
-    }
-  }
-
-  // Get merchandise catalog with user's affordability
-  async getMerchandiseCatalog(userPublicKey?: PublicKey) {
-    const userBalance = userPublicKey ? await this.getUserBalance(userPublicKey) : 0;
-
-    return MERCHANDISE_CATALOG.map(item => ({
-      ...item,
-      affordable: userBalance >= item.price,
-      priceInJuz: item.price / 1_000_000, // Convert to human-readable JUZ
-    }));
-  }
-}
+// JUZ Token mint public key from deployment
+export const juzTokenMint = getJuzMintAddress();
 
 /**
  * Get user's JUZ token balance
  */
 export async function getUserJuzBalance(userPublicKey: PublicKey): Promise<number> {
-  if (!juzTokenMint) {
-    console.warn('JUZ token mint not configured');
-    return 0;
-  }
-
   try {
     const tokenAccountAddress = await getAssociatedTokenAddress(
       juzTokenMint,
@@ -393,7 +86,7 @@ export async function getUserJuzBalance(userPublicKey: PublicKey): Promise<numbe
     );
 
     const tokenAccount = await getAccount(connection, tokenAccountAddress);
-    return Number(tokenAccount.amount) / Math.pow(10, JUZ_TOKEN_CONFIG.decimals);
+    return formatJuzTokenAmount(Number(tokenAccount.amount));
   } catch (error) {
     console.log('User has no JUZ token account yet:', error);
     return 0;
@@ -407,10 +100,6 @@ export async function createUserTokenAccount(
   userPublicKey: PublicKey,
   payerKeypair: Keypair
 ): Promise<PublicKey> {
-  if (!juzTokenMint) {
-    throw new Error('JUZ token mint not configured');
-  }
-
   const tokenAccount = await getOrCreateAssociatedTokenAccount(
     connection,
     payerKeypair,
@@ -422,49 +111,9 @@ export async function createUserTokenAccount(
 }
 
 /**
- * Mint JUZ tokens to user (for rewards)
- * This would typically be called from a backend service with mint authority
- */
-export async function mintJuzTokensToUser(
-  userPublicKey: PublicKey,
-  amount: number,
-  mintAuthorityKeypair: Keypair
-): Promise<string> {
-  if (!juzTokenMint) {
-    throw new Error('JUZ token mint not configured');
-  }
-
-  // Get or create user's token account
-  const userTokenAccount = await getOrCreateAssociatedTokenAccount(
-    connection,
-    mintAuthorityKeypair,
-    juzTokenMint,
-    userPublicKey
-  );
-
-  // Convert amount to token units (with decimals)
-  const tokenAmount = amount * Math.pow(10, JUZ_TOKEN_CONFIG.decimals);
-
-  // Mint tokens to user
-  const signature = await mintTo(
-    connection,
-    mintAuthorityKeypair,
-    juzTokenMint,
-    userTokenAccount.address,
-    mintAuthorityKeypair.publicKey,
-    tokenAmount
-  );
-
-  console.log('✅ Minted', amount, 'JUZ tokens to user. Transaction:', signature);
-  return signature;
-}
-
-/**
  * Check if user has JUZ token account
  */
 export async function userHasJuzTokenAccount(userPublicKey: PublicKey): Promise<boolean> {
-  if (!juzTokenMint) return false;
-
   try {
     const tokenAccountAddress = await getAssociatedTokenAddress(
       juzTokenMint,
@@ -481,11 +130,52 @@ export async function userHasJuzTokenAccount(userPublicKey: PublicKey): Promise<
   }
 }
 
-// Helper functions for formatting
-export function formatJuzAmount(amount: number): string {
-  return (amount / 1_000_000).toFixed(2);
+/**
+ * Calculate reading rewards based on time spent and page
+ */
+export function calculateReadingRewards(
+  timeSpentMinutes: number, 
+  pageNumber: number,
+  streakDays: number = 0
+): number {
+  let baseReward = timeSpentMinutes * READING_REWARDS.PER_MINUTE_READING;
+  
+  // Add page completion bonus
+  baseReward += READING_REWARDS.PAGE_COMPLETION_BONUS;
+  
+  // Add special page bonus if applicable (type-safe property access)
+  const specialPageReward = READING_REWARDS.SPECIAL_PAGES[pageNumber as keyof typeof READING_REWARDS.SPECIAL_PAGES];
+  if (specialPageReward) {
+    baseReward += specialPageReward;
+  }
+  
+  // Apply streak multiplier
+  let streakMultiplier = 1;
+  if (streakDays >= 30) {
+    streakMultiplier = READING_REWARDS.DAILY_STREAK_BONUS[30];
+  } else if (streakDays >= 14) {
+    streakMultiplier = READING_REWARDS.DAILY_STREAK_BONUS[14];
+  } else if (streakDays >= 7) {
+    streakMultiplier = READING_REWARDS.DAILY_STREAK_BONUS[7];
+  }
+  
+  return Math.floor(baseReward * streakMultiplier);
 }
 
-export function parseJuzAmount(juzAmount: number): number {
-  return Math.floor(juzAmount * 1_000_000);
+/**
+ * Format JUZ token amount for display
+ */
+export function formatJuzAmount(rawAmount: number): string {
+  const displayAmount = formatJuzTokenAmount(rawAmount);
+  return displayAmount.toFixed(2);
 }
+
+/**
+ * Parse JUZ display amount to raw token units
+ */
+export function parseJuzAmount(juzAmount: number): number {
+  return parseJuzTokenAmount(juzAmount);
+}
+
+// Export deployment config for components
+export { JUZ_DEPLOYMENT_CONFIG } from './deployment-config';

@@ -10,6 +10,8 @@ import { useWeb3AuthUser } from "@web3auth/modal/react";
 import { useSolanaWallet } from "@web3auth/modal/react/solana";
 import { useEffect, useState } from "react";
 import { PublicKey, Connection, clusterApiUrl } from "@solana/web3.js";
+import { getUserJuzBalance } from "@/lib/juz-token";
+import { JUZ_DEPLOYMENT_CONFIG } from "@/lib/deployment-config";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -17,12 +19,13 @@ export default function Navbar() {
   const { disconnect } = useWeb3AuthDisconnect();
   const { userInfo } = useWeb3AuthUser();
   const { accounts } = useSolanaWallet();
-  const [balance, setBalance] = useState<number | null>(null);
+  const [solBalance, setSolBalance] = useState<number | null>(null);
+  const [juzBalance, setJuzBalance] = useState<number | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const pubkey = accounts?.[0];
 
-  // Use public devnet RPC to avoid 403 errors (same as SolanaDemo)
+  // Use public devnet RPC to avoid 403 errors
   const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 
   // Navigation items
@@ -35,192 +38,238 @@ export default function Navbar() {
   ];
 
   useEffect(() => {
-    const fetchBalance = async () => {
+    const fetchBalances = async () => {
       if (connection && pubkey) {
         try {
           const publicKey = new PublicKey(pubkey);
-          const bal = await connection.getBalance(publicKey);
-          setBalance(bal / 1e9); // Convert lamports to SOL
+
+          // Fetch SOL balance
+          const sol = await connection.getBalance(publicKey);
+          setSolBalance(sol / 1e9); // Convert lamports to SOL
+
+          // Fetch JUZ token balance
+          const juz = await getUserJuzBalance(publicKey);
+          setJuzBalance(juz);
         } catch (error) {
-          console.error("Error fetching balance:", error);
-          setBalance(null);
+          console.error("Error fetching balances:", error);
+          setSolBalance(null);
+          setJuzBalance(null);
         }
       }
     };
 
-    if (isConnected) {
-      fetchBalance();
-    }
-  }, [pubkey, isConnected]);
+    fetchBalances();
+  }, [connection, pubkey]);
 
-  const handleConnect = async () => {
-    try {
-      await connect();
-    } catch (error) {
-      console.error("Connection failed:", error);
+  const handleConnect = () => {
+    connect();
+  };
+
+  const handleDisconnect = () => {
+    disconnect();
+    setSolBalance(null);
+    setJuzBalance(null);
+  };
+
+  const refreshBalances = async () => {
+    if (connection && pubkey) {
+      try {
+        const publicKey = new PublicKey(pubkey);
+        const sol = await connection.getBalance(publicKey);
+        setSolBalance(sol / 1e9);
+
+        const juz = await getUserJuzBalance(publicKey);
+        setJuzBalance(juz);
+      } catch (error) {
+        console.error("Error refreshing balances:", error);
+      }
     }
   };
 
-  const handleDisconnect = async () => {
-    try {
-      await disconnect();
-      setBalance(null);
-      setShowUserMenu(false);
-    } catch (error) {
-      console.error("Disconnection failed:", error);
-    }
-  };
+  const loggedInView = () => (
+    <div className="flex items-center gap-4">
+      {/* Balance Display */}
+      <div className="flex items-center gap-3 bg-white/10 rounded-lg px-3 py-2 text-sm">
+        <div className="flex items-center gap-1">
+          <span className="text-blue-300">◉</span>
+          <span className="text-white">
+            {solBalance !== null
+              ? `${solBalance.toFixed(3)} SOL`
+              : "Loading..."}
+          </span>
+        </div>
+        <div className="w-px h-4 bg-white/20"></div>
+        <div className="flex items-center gap-1">
+          <span className="text-yellow-300">🪙</span>
+          <span className="text-white">
+            {juzBalance !== null
+              ? `${juzBalance.toFixed(2)} JUZ`
+              : "Loading..."}
+          </span>
+        </div>
+        <button
+          onClick={refreshBalances}
+          className="ml-1 text-white/60 hover:text-white transition-colors"
+          title="Refresh balances"
+        >
+          ↻
+        </button>
+      </div>
 
-  const isActive = (href: string, exact = false) => {
-    if (exact) {
-      return pathname === href;
-    }
-    return pathname.startsWith(href);
-  };
-
-  return (
-    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-black/10">
-      <div className="mx-auto max-w-6xl px-4">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="text-2xl font-bold">📖</div>
-            <span className="text-xl font-semibold">Juzly</span>
-          </Link>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive(item.href, item.exact)
-                    ? "bg-black text-white"
-                    : "text-black/70 hover:text-black hover:bg-black/5"
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
+      {/* User Menu */}
+      <div className="relative">
+        <button
+          onClick={() => setShowUserMenu(!showUserMenu)}
+          className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2 hover:bg-white/20 transition-colors"
+        >
+          <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-xs font-bold text-white">
+            {userInfo?.name?.charAt(0)?.toUpperCase() || "U"}
           </div>
+          <span className="text-sm max-w-24 truncate text-white">
+            {pubkey ? `${pubkey.slice(0, 4)}...${pubkey.slice(-4)}` : "Unknown"}
+          </span>
+        </button>
 
-          {/* Wallet Section */}
-          <div className="flex items-center space-x-3">
-            {isConnected ? (
-              <div className="relative">
-                <button
-                  onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center space-x-2 px-3 py-2 rounded-md border border-black/20 hover:border-black/40 transition-colors"
-                >
-                  <div className="text-xs">
-                    <div className="font-medium">
-                      {connectorName && (
-                        <span className="text-green-600">{connectorName}</span>
-                      )}
-                    </div>
-                    <div className="font-medium">
-                      {pubkey?.slice(0, 4)}...{pubkey?.slice(-4)}
-                    </div>
-                    {balance !== null && (
-                      <div className="text-black/60">
-                        {balance.toFixed(3)} SOL
-                      </div>
-                    )}
-                  </div>
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                </button>
-
-                {/* User Menu Dropdown */}
-                {showUserMenu && (
-                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-black/10 py-2">
-                    <div className="px-4 py-2 border-b border-black/10">
-                      <div className="text-sm font-medium">
-                        Connected via {connectorName}
-                      </div>
-                      <div className="text-xs text-black/60 font-mono">
-                        {pubkey}
-                      </div>
-                    </div>
-
-                    {userInfo && (
-                      <div className="px-4 py-2 border-b border-black/10">
-                        <div className="text-sm font-medium">User Info</div>
-                        <div className="text-xs text-black/60">
-                          {userInfo.email || userInfo.name || "Anonymous"}
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="py-1">
-                      <Link
-                        href="/rewards"
-                        className="block px-4 py-2 text-sm hover:bg-black/5"
-                        onClick={() => setShowUserMenu(false)}
-                      >
-                        My Rewards
-                      </Link>
-                      <Link
-                        href="/marketplace"
-                        className="block px-4 py-2 text-sm hover:bg-black/5"
-                        onClick={() => setShowUserMenu(false)}
-                      >
-                        Marketplace
-                      </Link>
-                      <button
-                        onClick={handleDisconnect}
-                        className="block w-full text-left px-4 py-2 text-sm hover:bg-red-50 text-red-600"
-                      >
-                        Disconnect Wallet
-                      </button>
-                    </div>
-                  </div>
-                )}
+        {showUserMenu && (
+          <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border z-50">
+            <div className="p-4 border-b border-gray-100">
+              <div className="text-sm text-gray-600">
+                Connected via {connectorName}
               </div>
-            ) : (
-              <button
-                onClick={handleConnect}
-                className="px-4 py-2 bg-black text-white rounded-md text-sm font-medium hover:bg-black/80 transition-colors"
-              >
-                Connect Wallet
-              </button>
+              <div className="font-mono text-xs text-gray-500 mt-1 break-all">
+                {pubkey}
+              </div>
+            </div>
+
+            <div className="p-3 border-b border-gray-100">
+              <div className="text-xs text-gray-500 mb-2">
+                Token Information
+              </div>
+              <div className="text-xs space-y-1">
+                <div className="text-gray-700">
+                  Network:{" "}
+                  <span className="text-green-600 font-medium">
+                    Solana Devnet
+                  </span>
+                </div>
+                <div className="text-gray-700">
+                  Mint:{" "}
+                  <span className="font-mono text-gray-600">
+                    {JUZ_DEPLOYMENT_CONFIG.mintAddress.slice(0, 8)}...
+                  </span>
+                </div>
+                <a
+                  href={JUZ_DEPLOYMENT_CONFIG.explorer}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 hover:underline inline-block"
+                >
+                  View on Explorer ↗
+                </a>
+              </div>
+            </div>
+
+            {userInfo && (
+              <div className="p-3 border-b border-gray-100">
+                <div className="text-xs text-gray-500 mb-1">User Info</div>
+                <div className="text-sm text-gray-800 font-medium">
+                  {userInfo.name}
+                </div>
+                <div className="text-xs text-gray-500">{userInfo.email}</div>
+              </div>
             )}
 
-            {/* Mobile Menu Button */}
-            <button className="md:hidden p-2 rounded-md hover:bg-black/5">
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            <div className="p-3">
+              <button
+                onClick={handleDisconnect}
+                className="w-full bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 transition-colors text-sm font-medium"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            </button>
+                Disconnect Wallet
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  const unloggedInView = () => (
+    <button
+      onClick={handleConnect}
+      className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-2 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 font-medium"
+    >
+      Connect Wallet
+    </button>
+  );
+
+  return (
+    <nav className="bg-gradient-to-r from-slate-900 to-slate-800 shadow-lg border-b border-slate-700">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
+          <Link href="/" className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-lg">ج</span>
+            </div>
+            <span className="text-xl font-bold text-white">Juzly</span>
+            <span className="text-xs bg-blue-500 text-white px-2 py-1 rounded-full">
+              BETA
+            </span>
+          </Link>
+
+          {/* Navigation Links */}
+          <div className="hidden md:flex items-center space-x-1">
+            {navItems.map((item) => {
+              const isActive = item.exact
+                ? pathname === item.href
+                : pathname.startsWith(item.href) && item.href !== "/";
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    isActive
+                      ? "bg-white/20 text-white"
+                      : "text-gray-300 hover:text-white hover:bg-white/10"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Wallet Connection */}
+          <div className="flex items-center">
+            {isConnected ? loggedInView() : unloggedInView()}
           </div>
         </div>
+      </div>
 
-        {/* Mobile Navigation */}
-        <div className="md:hidden border-t border-black/10 py-2">
-          <div className="flex flex-wrap gap-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                  isActive(item.href, item.exact)
-                    ? "bg-black text-white"
-                    : "text-black/70 hover:text-black hover:bg-black/5"
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
+      {/* Mobile Navigation */}
+      <div className="md:hidden border-t border-slate-700">
+        <div className="max-w-7xl mx-auto px-4 py-2">
+          <div className="flex flex-wrap justify-center gap-2">
+            {navItems.map((item) => {
+              const isActive = item.exact
+                ? pathname === item.href
+                : pathname.startsWith(item.href) && item.href !== "/";
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`px-3 py-1 rounded-md text-xs font-medium transition-all duration-200 ${
+                    isActive
+                      ? "bg-white/20 text-white"
+                      : "text-gray-300 hover:text-white hover:bg-white/10"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </div>
         </div>
       </div>
