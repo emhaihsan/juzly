@@ -1,14 +1,13 @@
+const { createUmi } = require("@metaplex-foundation/umi-bundle-defaults");
 const {
-  Connection,
-  Keypair,
-  clusterApiUrl,
-  PublicKey,
-} = require("@solana/web3.js");
+  publicKey,
+  createSignerFromKeypair,
+  signerIdentity,
+} = require("@metaplex-foundation/umi");
 const {
-  Metaplex,
-  keypairIdentity,
-  bundlrStorage,
-} = require("@metaplex-foundation/js");
+  createMetadataAccountV3,
+  findMetadataPda,
+} = require("@metaplex-foundation/mpl-token-metadata");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
@@ -21,79 +20,72 @@ function loadKeypairFromFile(filePath) {
   const secretKey = Uint8Array.from(
     JSON.parse(fs.readFileSync(absolutePath, "utf8"))
   );
-  return Keypair.fromSecretKey(secretKey);
+  return secretKey;
 }
 
 const SOLANA_KEYPAIR_PATH =
   process.env.SOLANA_KEYPAIR_PATH ||
   path.join(os.homedir(), ".config/solana/id.json");
-const JUZ_MINT_ADDRESS = "5sNd52LXqZf4qWX5tkqwU5xKnwZVLRDEoV2bkdQWtzmB";
+const JUZ_MINT_ADDRESS = "qLHj71TYT9udjf25Lo4qAkCEEG12qiCwpQQnU1dojHY";
 
-async function createSimpleJuzTokenMetadata() {
-  console.log("🏷️ Creating Simple JUZ Token Metadata...\n");
+async function createJuzTokenMetadata() {
+  console.log("🏷️ Creating JUZ Token Metadata...\n");
 
   try {
+    // Init Umi on devnet
+    const umi = createUmi("https://api.devnet.solana.com");
+
     // Load mint authority
-    const mintAuthority = loadKeypairFromFile(SOLANA_KEYPAIR_PATH);
+    const secretKey = loadKeypairFromFile(SOLANA_KEYPAIR_PATH);
+    const umiKeypair = umi.eddsa.createKeypairFromSecretKey(secretKey);
+    const mintAuthority = createSignerFromKeypair(umi, umiKeypair);
+    umi.use(signerIdentity(mintAuthority));
+
     console.log("✅ Mint Authority:", mintAuthority.publicKey.toString());
 
-    // Setup connection and Metaplex
-    const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
-    const metaplex = Metaplex.make(connection).use(
-      keypairIdentity(mintAuthority)
+    const mint = publicKey(JUZ_MINT_ADDRESS);
+
+    // Derive Metadata PDA
+    const metadataPDA = findMetadataPda(umi, { mint });
+
+    console.log("📝 Creating metadata for:", JUZ_MINT_ADDRESS);
+    console.log(
+      "📍 Metadata PDA:",
+      metadataPDA[0]?.toString?.() || String(metadataPDA)
     );
 
-    console.log("📝 Token Metadata:");
-    console.log("• Name: Juzly");
-    console.log("• Symbol: JUZ");
-    console.log("• Storage: On-chain only (no external files)");
+    // Send create metadata transaction (minimal fields are enough for Explorer)
+    const tx = await createMetadataAccountV3(umi, {
+      metadata: metadataPDA,
+      mint,
+      mintAuthority,
+      payer: mintAuthority,
+      updateAuthority: mintAuthority,
+      data: {
+        name: "Juzly Token",
+        symbol: "JUZ",
+        uri: "", // Explorer will still show name/symbol without external JSON
+        sellerFeeBasisPoints: 0,
+        creators: null,
+        collection: null,
+        uses: null,
+      },
+      collectionDetails: null,
+      isMutable: true,
+    }).sendAndConfirm(umi);
 
-    console.log("\n🔗 Creating on-chain metadata account...");
-
-    // Create metadata with minimal data - no external URI needed
-    const mintAddress = new PublicKey(JUZ_MINT_ADDRESS);
-
-    const { response } = await metaplex.nfts().create({
-      mint: mintAddress,
-      name: "Juzly",
-      symbol: "JUZ",
-      uri: "", // Empty URI for simple on-chain storage
-      sellerFeeBasisPoints: 0, // No royalties for utility token
-      isMutable: true, // Allow future updates
-    });
-
-    console.log("✅ Metadata created! Transaction:", response.signature);
-
-    console.log("\n🎉 Simple JUZ Token Metadata Setup Complete!");
-    console.log("=".repeat(50));
-    console.log("• Token Name: Juzly");
-    console.log("• Symbol: JUZ");
-    console.log("• Storage: On-chain only");
-    console.log("• Cost: ~0.01 SOL");
-    console.log("• Mint Address:", JUZ_MINT_ADDRESS);
-    console.log("• Transaction:", response.signature);
+    const sig = Buffer.from(tx.signature).toString("base64");
+    console.log("✅ Metadata created! Transaction (base64):", sig);
     console.log(
-      "• Explorer:",
+      "🔍 Explorer (search by mint):",
       `https://explorer.solana.com/address/${JUZ_MINT_ADDRESS}?cluster=devnet`
     );
-    console.log("=".repeat(50));
-
-    console.log(
-      "\n⏰ Please wait 1-2 minutes for Solana Explorer to update..."
-    );
   } catch (error) {
-    console.error("❌ Metadata creation failed:", error);
-
-    if (error.message.includes("Metadata account already exists")) {
-      console.log(
-        "\n💡 Metadata already exists. Token should show properly on Explorer."
-      );
-      process.exit(0);
+    console.error("❌ Metadata creation failed:", error.message || error);
+    if (String(error.message || error).includes("already in use")) {
+      console.log("💡 Metadata already exists for this token.");
     }
-
-    process.exit(1);
   }
 }
 
-// Run metadata creation
-createSimpleJuzTokenMetadata();
+createJuzTokenMetadata();

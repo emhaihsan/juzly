@@ -26,11 +26,13 @@ function useBalance(pubkey: string | null) {
 
 // Track minting history
 function getMintingHistory(): any[] {
+  if (typeof window === "undefined") return [];
   const raw = localStorage.getItem(LS_MINTING_HISTORY);
   return raw ? JSON.parse(raw) : [];
 }
 
 function addMintingRecord(record: any) {
+  if (typeof window === "undefined") return;
   const history = getMintingHistory();
   history.unshift(record);
   localStorage.setItem(
@@ -48,9 +50,11 @@ export default function RewardsPage() {
   const [onChainBalance, setOnChainBalance] = useState<number>(0);
   const [balanceLoading, setBalanceLoading] = useState(false);
   const [minting, setMinting] = useState(false);
-  const [mintingHistory, setMintingHistory] = useState<any[]>(
-    getMintingHistory()
-  );
+  const [mintingHistory, setMintingHistory] = useState<any[]>([]);
+
+  useEffect(() => {
+    setMintingHistory(getMintingHistory());
+  }, []);
 
   useEffect(() => {
     const fetchRealJuzBalance = async () => {

@@ -89,20 +89,11 @@ async function deployJuzToken() {
       mintAuthorityTokenAccount.address.toString()
     );
 
-    // Step 5: Mint initial supply (1 billion JUZ tokens)
-    console.log("\n🏭 Step 5: Minting initial token supply...");
-    const initialSupply = 1_000_000_000 * Math.pow(10, 6); // 1B tokens with 6 decimals
-
-    await mintTo(
-      connection,
-      mintAuthority,
-      mint,
-      mintAuthorityTokenAccount.address,
-      mintAuthority.publicKey,
-      initialSupply
+    // Step 5: Token mint created with 0 initial supply
+    console.log("\n✅ Step 5: Token mint created with 0 initial supply");
+    console.log(
+      "📋 Tokens will only be minted when distributing rewards to users"
     );
-
-    console.log("✅ Minted", initialSupply / Math.pow(10, 6), "JUZ tokens");
 
     // Step 6: Save configuration
     console.log("\n💾 Step 6: Saving deployment configuration...");
@@ -112,7 +103,7 @@ async function deployJuzToken() {
       mintAddress: mint.toString(),
       mintAuthority: mintAuthority.publicKey.toString(),
       deploymentTime: new Date().toISOString(),
-      initialSupply: initialSupply,
+      initialSupply: 0, // Start with 0 supply
       decimals: 6,
       explorer: `https://explorer.solana.com/address/${mint.toString()}?cluster=devnet`,
     };
@@ -128,7 +119,7 @@ async function deployJuzToken() {
     console.log("📋 Deployment Summary:");
     console.log("• Mint Address:", mint.toString());
     console.log("• Network: Solana Devnet");
-    console.log("• Total Supply: 1,000,000,000 JUZ");
+    console.log("• Initial Supply: 0 JUZ (rewards-only minting)");
     console.log("• Decimals: 6");
     console.log("• Explorer:", deploymentConfig.explorer);
     console.log("=".repeat(50));

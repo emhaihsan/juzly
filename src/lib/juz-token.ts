@@ -1,9 +1,6 @@
 import { Connection, PublicKey, clusterApiUrl, Keypair } from '@solana/web3.js';
 import { 
-  createMint, 
-  getOrCreateAssociatedTokenAccount, 
-  mintTo, 
-  transfer,
+  getOrCreateAssociatedTokenAccount,  
   getAccount,
   TOKEN_PROGRAM_ID,
   ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -23,7 +20,7 @@ export const JUZ_TOKEN_CONFIG = {
   symbol: 'JUZ',
   decimals: getJuzDecimals(),
   description: 'Reward token for reading the Holy Quran on Juzly platform',
-  image: 'https://arweave.net/juz-token-logo.png',
+  image: '',
   mintAddress: getJuzMintAddress().toString(),
   explorer: JUZ_DEPLOYMENT_CONFIG.explorer
 };
@@ -31,39 +28,7 @@ export const JUZ_TOKEN_CONFIG = {
 // Reading reward rates (JUZ tokens per activity)
 export const READING_REWARDS = {
   // Base reading rewards
-  PER_MINUTE_READING: parseJuzTokenAmount(1), // 1 JUZ per minute
-  PAGE_COMPLETION_BONUS: parseJuzTokenAmount(0.5), // 0.5 JUZ bonus for completing a page
-  
-  // Streak bonuses (multipliers)
-  DAILY_STREAK_BONUS: {
-    7: 1.2,   // 20% bonus for 7-day streak
-    14: 1.5,  // 50% bonus for 14-day streak
-    30: 2.0,  // 100% bonus for 30-day streak
-  },
-  
-  // Special page bonuses
-  SPECIAL_PAGES: {
-    1: parseJuzTokenAmount(2),    // 2 JUZ for Al-Fatihah (page 1)
-    2: parseJuzTokenAmount(1.5),  // 1.5 JUZ for start of Al-Baqarah
-    604: parseJuzTokenAmount(5),  // 5 JUZ for completing Quran (last page)
-  },
-  
-  // Achievement bonuses
-  ACHIEVEMENT_BONUS: {
-    first_week: parseJuzTokenAmount(10),      // 10 JUZ
-    monthly_reader: parseJuzTokenAmount(25),  // 25 JUZ
-    century_club: parseJuzTokenAmount(100),   // 100 JUZ
-    diamond_reader: parseJuzTokenAmount(300), // 300 JUZ
-    quran_complete: parseJuzTokenAmount(1000), // 1000 JUZ
-  },
-  
-  // Leaderboard rewards (weekly)
-  LEADERBOARD_WEEKLY: {
-    1: parseJuzTokenAmount(50),   // 1st place: 50 JUZ
-    2: parseJuzTokenAmount(30),   // 2nd place: 30 JUZ
-    3: parseJuzTokenAmount(20),   // 3rd place: 20 JUZ
-    top10: parseJuzTokenAmount(5) // Top 10: 5 JUZ
-  }
+  PER_PAGE_READING: 0.05, // 0.05 JUZ per page
 };
 
 // Connection to Solana devnet
@@ -131,35 +96,18 @@ export async function userHasJuzTokenAccount(userPublicKey: PublicKey): Promise<
 }
 
 /**
- * Calculate reading rewards based on time spent and page
+ * Calculate reading rewards based on page completion only
  */
 export function calculateReadingRewards(
   timeSpentMinutes: number, 
   pageNumber: number,
   streakDays: number = 0
 ): number {
-  let baseReward = timeSpentMinutes * READING_REWARDS.PER_MINUTE_READING;
+  // Simple reward: 0.05 JUZ per page completed
+  // Convert to lamports (6 decimals): 0.05 * 1,000,000 = 50,000
+  const baseReward = 50_000; // 0.05 JUZ in lamports
   
-  // Add page completion bonus
-  baseReward += READING_REWARDS.PAGE_COMPLETION_BONUS;
-  
-  // Add special page bonus if applicable (type-safe property access)
-  const specialPageReward = READING_REWARDS.SPECIAL_PAGES[pageNumber as keyof typeof READING_REWARDS.SPECIAL_PAGES];
-  if (specialPageReward) {
-    baseReward += specialPageReward;
-  }
-  
-  // Apply streak multiplier
-  let streakMultiplier = 1;
-  if (streakDays >= 30) {
-    streakMultiplier = READING_REWARDS.DAILY_STREAK_BONUS[30];
-  } else if (streakDays >= 14) {
-    streakMultiplier = READING_REWARDS.DAILY_STREAK_BONUS[14];
-  } else if (streakDays >= 7) {
-    streakMultiplier = READING_REWARDS.DAILY_STREAK_BONUS[7];
-  }
-  
-  return Math.floor(baseReward * streakMultiplier);
+  return baseReward;
 }
 
 /**

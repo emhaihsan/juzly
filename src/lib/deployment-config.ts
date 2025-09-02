@@ -12,14 +12,14 @@ export interface DeploymentConfig {
 
 // JUZ Token Deployment Configuration
 export const JUZ_DEPLOYMENT_CONFIG: DeploymentConfig = {
-  network: "devnet",
-  mintAddress: "5sNd52LXqZf4qWX5tkqwU5xKnwZVLRDEoV2bkdQWtzmB",
-  mintAuthority: "CEWxm2fReUAnycavAaM7FuUoFgLJyCFbuyxY8iT8CRAz",
-  deploymentTime: "2025-09-02T04:00:30.295Z",
-  initialSupply: 1000000000000000,
-  decimals: 6,
-  explorer: "https://explorer.solana.com/address/5sNd52LXqZf4qWX5tkqwU5xKnwZVLRDEoV2bkdQWtzmB?cluster=devnet"
-};
+  "network": "devnet",
+  "mintAddress": "qLHj71TYT9udjf25Lo4qAkCEEG12qiCwpQQnU1dojHY",
+  "mintAuthority": "CEWxm2fReUAnycavAaM7FuUoFgLJyCFbuyxY8iT8CRAz",
+  "deploymentTime": "2025-09-02T05:38:46.261Z",
+  "initialSupply": 0,
+  "decimals": 6,
+  "explorer": "https://explorer.solana.com/address/qLHj71TYT9udjf25Lo4qAkCEEG12qiCwpQQnU1dojHY?cluster=devnet"
+}
 
 // Export convenient getters
 export const getJuzMintAddress = (): PublicKey => {

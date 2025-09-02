@@ -212,19 +212,9 @@ export default function ReadTimer({ page }: { page: number }) {
     setClaiming(true);
     try {
       const current = getBalance(pubkey);
-      // Reading reward: 1 JUZ token per minute of reading
-      const timeReward = Math.floor((seconds / 60) * 1_000_000); // 1 JUZ per minute
+      // Simple fixed reward: 0.05 JUZ per page completed
+      const totalReward = 50_000; // 0.05 JUZ in lamports
 
-      // Page completion bonus
-      const pageBonus = 500_000; // 0.5 JUZ for completing any page
-
-      // Special page bonuses
-      let specialBonus = 0;
-      if (page === 1) specialBonus = 2_000_000; // 2 JUZ bonus for Al-Fatihah
-      if (page === 2) specialBonus = 1_500_000; // 1.5 JUZ bonus for start of Al-Baqarah
-      if (page === 604) specialBonus = 5_000_000; // 5 JUZ bonus for completing Quran
-
-      const totalReward = timeReward + pageBonus + specialBonus;
       setBalance(pubkey, current + totalReward);
       setClaimed(true);
       setPageCompleted(true);
@@ -255,11 +245,8 @@ export default function ReadTimer({ page }: { page: number }) {
       }
 
       alert(
-        `🎉 Reading Rewards Earned!\n\n` +
-          `⏱️ Time Reward: ${(timeReward / 1_000_000).toFixed(2)} JUZ\n` +
-          `📄 Page Bonus: ${(pageBonus / 1_000_000).toFixed(2)} JUZ\n` +
-          `⭐ Special Bonus: ${(specialBonus / 1_000_000).toFixed(2)} JUZ\n` +
-          `💰 Total: ${(totalReward / 1_000_000).toFixed(2)} JUZ tokens\n\n` +
+        `🎉 Reading Reward Earned!\n\n` +
+          `💰 Reward: 0.05 JUZ tokens\n\n` +
           `Go to Rewards page to mint these tokens to blockchain!`
       );
     } finally {
@@ -277,13 +264,7 @@ export default function ReadTimer({ page }: { page: number }) {
             Read to Earn {pageCompleted && "✅"}
           </div>
           <div className="text-xs text-black/60">
-            Page {page} • Min: {minReadingTime}s • Reward:{" "}
-            {(
-              (Math.floor(1_000_000 / 20) +
-                (page === 1 ? 100_000 : page === 604 ? 1_000_000 : 0)) /
-              1_000_000
-            ).toFixed(3)}{" "}
-            JUZ
+            Page {page} • Min: {minReadingTime}s • Reward: 0.05 JUZ
           </div>
         </div>
         <div className="text-sm font-mono">
@@ -330,10 +311,8 @@ export default function ReadTimer({ page }: { page: number }) {
             : claimed
             ? "Claimed This Session"
             : seconds >= minReadingTime
-            ? "Claim JUZ Rewards"
-            : `Read ${Math.ceil(
-                (minReadingTime - seconds) / 60
-              )}+ min to claim`}
+            ? "Claim JUZ Token"
+            : "Keep Reading..."}
         </button>
         <Link
           href="/rewards"
