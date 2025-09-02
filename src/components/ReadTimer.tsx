@@ -206,27 +206,27 @@ export default function ReadTimer({ page }: { page: number }) {
 
   const doClaim = async () => {
     if (!isConnected || !pubkey) {
-      alert("Connect wallet terlebih dahulu.");
+      alert("Please connect your wallet first.");
       return;
     }
     if (seconds < minReadingTime) {
-      alert(`Minimal ${minReadingTime} detik untuk klaim halaman ini.`);
+      alert(`Minimum ${minReadingTime} seconds required to claim this page.`);
       return;
     }
     if (claimed || pageCompleted) {
-      alert("Halaman ini sudah diklaim sebelumnya.");
+      alert("This page has already been claimed.");
       return;
     }
 
     setClaiming(true);
     try {
       const current = getBalance(pubkey);
-      // New tokenomics: 1/604 JUZ token per page completion (~1656 tokens)
-      const pageReward = Math.floor(1_000_000 / 604); // ~1656 tokens per page
+      // New tokenomics: 1/20 JUZ token per page completion (50,000 tokens)
+      const pageReward = Math.floor(1_000_000 / 20); // 50,000 tokens per page
 
       // Special page bonuses
       let bonus = 0;
-      if (page === 1) bonus = 500_000; // 0.5 JUZ bonus for Al-Fatihah
+      if (page === 1) bonus = 100_000; // 0.1 JUZ bonus for Al-Fatihah
       if (page === 604) bonus = 1_000_000; // 1 JUZ bonus for completing Quran
 
       const totalReward = pageReward + bonus;
@@ -253,14 +253,14 @@ export default function ReadTimer({ page }: { page: number }) {
 
       if (isNftEligible) {
         alert(
-          `🎉 Selamat! Anda telah menyelesaikan ${pagesRead.length} halaman dan memenuhi syarat NFT reward!`
+          `🎉 Congratulations! You have completed ${pagesRead.length} pages and are eligible for NFT rewards!`
         );
       }
 
       alert(
-        `✅ Berhasil! Anda mendapat ${(totalReward / 1_000_000).toFixed(
+        `✅ Success! You earned ${(totalReward / 1_000_000).toFixed(
           3
-        )} JUZ token untuk halaman ${page}!`
+        )} JUZ tokens for page ${page}!`
       );
     } finally {
       setClaiming(false);
@@ -277,10 +277,10 @@ export default function ReadTimer({ page }: { page: number }) {
             Read to Earn {pageCompleted && "✅"}
           </div>
           <div className="text-xs text-black/60">
-            Halaman {page} • Min: {minReadingTime}s • Reward:{" "}
+            Page {page} • Min: {minReadingTime}s • Reward:{" "}
             {(
-              (Math.floor(1_000_000 / 604) +
-                (page === 1 ? 500_000 : page === 604 ? 1_000_000 : 0)) /
+              (Math.floor(1_000_000 / 20) +
+                (page === 1 ? 100_000 : page === 604 ? 1_000_000 : 0)) /
               1_000_000
             ).toFixed(3)}{" "}
             JUZ
@@ -307,15 +307,15 @@ export default function ReadTimer({ page }: { page: number }) {
       <div className="mt-2 flex items-center justify-between text-xs text-black/60">
         <div>
           {!pageCompleted && progressToComplete > 0
-            ? `${progressToComplete}s lagi untuk selesai`
+            ? `${progressToComplete}s remaining to complete`
             : pageCompleted
-            ? "Halaman selesai! Lanjut ke halaman berikutnya."
-            : "Siap untuk diklaim!"}
+            ? "Page completed! Continue to next page."
+            : "Ready to claim!"}
         </div>
         <div>
           {isConnected && pubkey
             ? `${pubkey.slice(0, 4)}...${pubkey.slice(-4)}`
-            : "Wallet belum tersambung"}
+            : "Wallet not connected"}
         </div>
       </div>
 
@@ -330,7 +330,7 @@ export default function ReadTimer({ page }: { page: number }) {
           {claiming
             ? "Claiming..."
             : claimed || pageCompleted
-            ? "Sudah Diklaim"
+            ? "Already Claimed"
             : "Claim JUZ Token"}
         </button>
         <Link

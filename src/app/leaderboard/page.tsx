@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useWeb3AuthConnect } from "@web3auth/modal/react";
 import { useSolanaWallet } from "@web3auth/modal/react/solana";
+import { PublicKey } from "@solana/web3.js";
+import { JuzTokenManager } from "@/lib/juz-token";
 
 const LS_BALANCES = "r2e_balances";
 const LS_PAGES_READ = "r2e_pages_read";
@@ -64,7 +66,7 @@ function getNFTAchievements(pagesRead: number): string[] {
 
 export default function LeaderboardPage() {
   const { isConnected } = useWeb3AuthConnect();
-  const { accounts } = useSolanaWallet();
+  const { accounts, connection } = useSolanaWallet();
   const pubkey = accounts?.[0] || null;
 
   const [view, setView] = useState<"all-time" | "weekly" | "monthly">("weekly");
@@ -87,22 +89,46 @@ export default function LeaderboardPage() {
       // Ensure demo data for hackathon
       if (Object.keys(bal).length < 5) {
         const demoUsers = [
-          { id: "DemoAhmad123", points: 85, pages: 12, weekly: 8, monthly: 12 },
+          {
+            id: "DemoAhmad123",
+            tokens: Math.floor(1_000_000 * 0.15),
+            pages: 90,
+            weekly: 15,
+            monthly: 45,
+          },
           {
             id: "DemoFatima456",
-            points: 72,
-            pages: 10,
-            weekly: 6,
-            monthly: 10,
+            tokens: Math.floor(1_000_000 * 0.12),
+            pages: 72,
+            weekly: 12,
+            monthly: 36,
           },
-          { id: "DemoUmar789", points: 68, pages: 9, weekly: 5, monthly: 9 },
-          { id: "DemoAisha012", points: 55, pages: 7, weekly: 4, monthly: 7 },
-          { id: "DemoAli345", points: 42, pages: 6, weekly: 3, monthly: 6 },
+          {
+            id: "DemoUmar789",
+            tokens: Math.floor(1_000_000 * 0.1),
+            pages: 60,
+            weekly: 10,
+            monthly: 30,
+          },
+          {
+            id: "DemoAisha012",
+            tokens: Math.floor(1_000_000 * 0.08),
+            pages: 48,
+            weekly: 8,
+            monthly: 24,
+          },
+          {
+            id: "DemoAli345",
+            tokens: Math.floor(1_000_000 * 0.06),
+            pages: 36,
+            weekly: 6,
+            monthly: 18,
+          },
         ];
 
         demoUsers.forEach((user) => {
           if (!bal[user.id]) {
-            bal[user.id] = user.points;
+            bal[user.id] = user.tokens;
             pages[user.id] = Array.from(
               { length: user.pages },
               (_, i) => i + 1
@@ -141,6 +167,7 @@ export default function LeaderboardPage() {
       score: number;
       pages: number;
       achievements: string[];
+      juzTokens: number;
     }> = [];
 
     if (view === "weekly") {
@@ -149,6 +176,7 @@ export default function LeaderboardPage() {
         score: pages,
         pages: pagesRead[user]?.length || 0,
         achievements: getNFTAchievements(pagesRead[user]?.length || 0),
+        juzTokens: balances[user] || 0,
       }));
     } else if (view === "monthly") {
       data = Object.entries(monthlyProgress).map(([user, pages]) => ({
@@ -156,13 +184,15 @@ export default function LeaderboardPage() {
         score: pages,
         pages: pagesRead[user]?.length || 0,
         achievements: getNFTAchievements(pagesRead[user]?.length || 0),
+        juzTokens: balances[user] || 0,
       }));
     } else {
-      data = Object.entries(balances).map(([user, points]) => ({
+      data = Object.entries(balances).map(([user, tokens]) => ({
         user,
-        score: points,
+        score: Math.floor((tokens / 1_000_000) * 20), // Convert tokens to page equivalent for sorting
         pages: pagesRead[user]?.length || 0,
         achievements: getNFTAchievements(pagesRead[user]?.length || 0),
+        juzTokens: tokens,
       }));
     }
 
@@ -182,7 +212,7 @@ export default function LeaderboardPage() {
       case "monthly":
         return "Pages This Month";
       default:
-        return "Total Points";
+        return "JUZ Tokens";
     }
   };
 
@@ -228,7 +258,7 @@ export default function LeaderboardPage() {
             {view === "weekly" && `Current Week: ${getWeekKey()}`}
             {view === "monthly" && `Current Month: ${getMonthKey()}`}
             {view === "all-time" &&
-              "All-time rankings based on total reading points"}
+              "All-time rankings based on JUZ token earnings (1 token = 20 pages)"}
           </div>
         </div>
 
@@ -236,9 +266,10 @@ export default function LeaderboardPage() {
         <div className="rounded-xl border border-black/10 bg-white p-4 sm:p-6 shadow-sm">
           <div className="grid grid-cols-12 text-xs font-medium uppercase text-black/60 mb-4">
             <div className="col-span-1">Rank</div>
-            <div className="col-span-4">User</div>
+            <div className="col-span-3">User</div>
             <div className="col-span-2 text-center">{getScoreLabel()}</div>
-            <div className="col-span-2 text-center">Total Pages</div>
+            <div className="col-span-2 text-center">JUZ Tokens</div>
+            <div className="col-span-1 text-center">Pages</div>
             <div className="col-span-3 text-center">NFT Achievements</div>
           </div>
 
@@ -258,7 +289,7 @@ export default function LeaderboardPage() {
                   {idx === 2 && "🥉"}
                   {idx > 2 && `#${idx + 1}`}
                 </div>
-                <div className="col-span-4 font-mono text-xs">
+                <div className="col-span-3 font-mono text-xs">
                   {item.user.slice(0, 8)}...{item.user.slice(-6)}
                   {pubkey && item.user === pubkey && (
                     <span className="ml-2 text-yellow-600 font-normal">
@@ -267,9 +298,14 @@ export default function LeaderboardPage() {
                   )}
                 </div>
                 <div className="col-span-2 text-center font-semibold">
-                  {item.score}
+                  {view === "all-time"
+                    ? (item.juzTokens / 1_000_000).toFixed(3)
+                    : item.score}
                 </div>
-                <div className="col-span-2 text-center text-black/70">
+                <div className="col-span-2 text-center text-green-600 font-medium">
+                  {(item.juzTokens / 1_000_000).toFixed(3)}
+                </div>
+                <div className="col-span-1 text-center text-black/70">
                   {item.pages}
                 </div>
                 <div className="col-span-3 text-center text-xs">
@@ -298,16 +334,44 @@ export default function LeaderboardPage() {
 
             {leaderboardData.length === 0 && (
               <div className="py-8 text-center text-black/60">
-                Belum ada data untuk periode ini.
+                No data for this period.
               </div>
             )}
+          </div>
+        </div>
+
+        {/* JUZ Token Info */}
+        <div className="rounded-xl border border-black/10 bg-gradient-to-r from-green-50 to-blue-50 p-4 sm:p-6 shadow-sm">
+          <h2 className="text-lg font-semibold mb-3">🪙 JUZ Token System</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
+            <div className="bg-white/50 rounded-lg p-3">
+              <div className="font-medium">Per Page Reward</div>
+              <div className="text-lg font-semibold">
+                {(Math.floor(1_000_000 / 20) / 1_000_000).toFixed(6)} JUZ
+              </div>
+              <div className="text-xs text-black/60">1/20 token per page</div>
+            </div>
+            <div className="bg-white/50 rounded-lg p-3">
+              <div className="font-medium">Full Juz Reward</div>
+              <div className="text-lg font-semibold">1.000 JUZ</div>
+              <div className="text-xs text-black/60">
+                Complete 20 pages = 1 full token
+              </div>
+            </div>
+            <div className="bg-white/50 rounded-lg p-3">
+              <div className="font-medium">Special Bonuses</div>
+              <div className="text-lg font-semibold">+0.5 - 1.0 JUZ</div>
+              <div className="text-xs text-black/60">
+                Al-Fatihah & completion bonuses
+              </div>
+            </div>
           </div>
         </div>
 
         {/* NFT Rewards Info */}
         <div className="rounded-xl border border-black/10 bg-gradient-to-r from-purple-50 to-blue-50 p-4 sm:p-6 shadow-sm">
           <h2 className="text-lg font-semibold mb-3">
-            🎨 NFT Reward Milestones
+            🎨 NFT Achievement Milestones
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
             <div className="bg-white/50 rounded-lg p-3">

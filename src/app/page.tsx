@@ -15,17 +15,17 @@ export default function Home() {
           {/* Quran Card */}
           <div className="rounded-xl border border-black/10 bg-white p-6 shadow-sm flex flex-col">
             <div className="text-4xl mb-3">📖</div>
-            <h2 className="text-xl font-semibold">Baca Quran</h2>
+            <h2 className="text-xl font-semibold">Read Quran</h2>
             <p className="text-sm text-black/70 mt-1 flex-1">
-              Mulai membaca Al-Qur'an dengan tampilan bersih dan nyaman.
-              Dapatkan JUZ token untuk setiap menit membaca.
+              Start reading the Holy Quran with a clean and comfortable
+              interface. Earn JUZ tokens for every page you read.
             </p>
             <div className="mt-auto pt-4">
               <Link
                 href="/quran"
                 className="inline-flex items-center rounded-md border border-black px-4 py-2 text-sm font-medium hover:bg-black hover:text-white transition-colors"
               >
-                Mulai Membaca
+                Start Reading
               </Link>
             </div>
           </div>
@@ -35,15 +35,15 @@ export default function Home() {
             <div className="text-4xl mb-3">🛍️</div>
             <h2 className="text-xl font-semibold">JUZ Marketplace</h2>
             <p className="text-sm text-black/70 mt-1 flex-1">
-              Tukarkan JUZ token dengan merchandise Islami, NFT digital, dan
-              donasi amal.
+              Exchange JUZ tokens for Islamic merchandise, digital NFTs, and
+              charitable donations.
             </p>
             <div className="mt-auto pt-4">
               <Link
                 href="/marketplace"
                 className="inline-flex items-center rounded-md bg-black text-white px-4 py-2 text-sm font-medium hover:bg-black/80 transition-colors"
               >
-                Lihat Marketplace
+                View Marketplace
               </Link>
             </div>
           </div>
@@ -53,15 +53,15 @@ export default function Home() {
             <div className="text-4xl mb-3">🏆</div>
             <h2 className="text-xl font-semibold">Leaderboard</h2>
             <p className="text-sm text-black/70 mt-1 flex-1">
-              Lihat ranking pembaca Al-Qur'an dan raih NFT achievement untuk
-              pencapaian terbaik.
+              View Quran reading rankings and earn NFT achievements for your
+              best accomplishments.
             </p>
             <div className="mt-auto pt-4">
               <Link
                 href="/leaderboard"
                 className="inline-flex items-center rounded-md border border-orange-600 text-orange-600 px-4 py-2 text-sm font-medium hover:bg-orange-600 hover:text-white transition-colors"
               >
-                Lihat Ranking
+                View Rankings
               </Link>
             </div>
           </div>
@@ -70,32 +70,36 @@ export default function Home() {
         {/* How It Works */}
         <section className="rounded-xl border border-black/10 bg-white p-6 shadow-sm">
           <h2 className="text-xl font-semibold mb-4">
-            🚀 Cara Kerja Read-to-Earn
+            🚀 How Read-to-Earn Works
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="text-center p-4 rounded-lg bg-black/5">
               <div className="text-3xl mb-2">📖</div>
-              <div className="font-medium">1. Baca Quran</div>
+              <div className="font-medium">1. Read Quran</div>
               <div className="text-sm text-black/60">
-                Minimal 1 menit per halaman
+                Minimum 1 minute per page
               </div>
             </div>
             <div className="text-center p-4 rounded-lg bg-black/5">
               <div className="text-3xl mb-2">🪙</div>
-              <div className="font-medium">2. Dapatkan JUZ</div>
+              <div className="font-medium">2. Earn JUZ</div>
               <div className="text-sm text-black/60">
-                1 JUZ per menit + bonus
+                1/20 JUZ per page + bonuses
               </div>
             </div>
             <div className="text-center p-4 rounded-lg bg-black/5">
               <div className="text-3xl mb-2">🎨</div>
-              <div className="font-medium">3. Raih NFT</div>
-              <div className="text-sm text-black/60">Achievement milestone</div>
+              <div className="font-medium">3. Get NFTs</div>
+              <div className="text-sm text-black/60">
+                Achievement milestones
+              </div>
             </div>
             <div className="text-center p-4 rounded-lg bg-black/5">
               <div className="text-3xl mb-2">🛍️</div>
-              <div className="font-medium">4. Tukar Hadiah</div>
-              <div className="text-sm text-black/60">Merchandise & donasi</div>
+              <div className="font-medium">4. Exchange Rewards</div>
+              <div className="text-sm text-black/60">
+                Merchandise & donations
+              </div>
             </div>
           </div>
         </section>
@@ -105,31 +109,31 @@ export default function Home() {
 
         {/* Overview Juzly */}
         <section className="rounded-xl border border-black/10 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-semibold">Mengapa Juzly?</h2>
+          <h2 className="text-xl font-semibold">Why Juzly?</h2>
           <ul className="mt-3 space-y-2 text-sm text-black/80 list-disc pl-5">
             <li>
-              <strong>Read-to-Earn</strong> — dapatkan JUZ token dan NFT untuk
-              setiap aktivitas membaca Al-Qur'an.
+              <strong>Read-to-Earn</strong> — earn JUZ tokens and NFTs for every
+              Quran reading activity.
             </li>
             <li>
-              <strong>Blockchain Solana</strong> — teknologi Web3 dengan biaya
-              transaksi rendah dan kecepatan tinggi.
+              <strong>Solana Blockchain</strong> — Web3 technology with low
+              transaction costs and high speed.
             </li>
             <li>
-              <strong>Marketplace Islami</strong> — tukar token dengan
-              merchandise bertemakan Islam dan donasi amal.
+              <strong>Islamic Marketplace</strong> — exchange tokens for
+              Islamic-themed merchandise and charitable donations.
             </li>
             <li>
-              <strong>Minimalis & cepat</strong> — fokus pada baca, antarmuka
-              hitam-putih yang ringan.
+              <strong>Minimalist & Fast</strong> — focused on reading with a
+              lightweight black-and-white interface.
             </li>
             <li>
-              <strong>Waktu sholat akurat</strong> — berbasis geolokasi dan zona
-              waktu perangkat.
+              <strong>Accurate Prayer Times</strong> — based on geolocation and
+              device timezone.
             </li>
             <li>
-              <strong>Privasi duluan</strong> — tanpa pelacakan, hanya
-              permintaan API publik.
+              <strong>Privacy First</strong> — no tracking, only public API
+              requests.
             </li>
           </ul>
         </section>

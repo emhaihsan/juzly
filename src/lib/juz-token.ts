@@ -6,7 +6,8 @@ import {
   transfer,
   getAccount,
   TOKEN_PROGRAM_ID,
-  ASSOCIATED_TOKEN_PROGRAM_ID
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+  getAssociatedTokenAddress
 } from '@solana/spl-token';
 
 // JUZ Token Configuration
@@ -115,6 +116,11 @@ export class JuzTokenManager {
     this.connection = new Connection(rpcUrl || clusterApiUrl('devnet'));
   }
 
+  // Set existing connection (for Web3Auth integration)
+  setConnection(connection: Connection) {
+    this.connection = connection;
+  }
+
   // Initialize JUZ token mint (one-time setup)
   async initializeToken(payer: Keypair): Promise<PublicKey> {
     try {
@@ -148,27 +154,62 @@ export class JuzTokenManager {
   }
 
   // Get or create user's JUZ token account
-  async getUserTokenAccount(userPublicKey: PublicKey) {
+  async getUserTokenAccount(userPublicKey: PublicKey, payerKeypair?: Keypair) {
     if (!this.mintAddress) {
       throw new Error('Token mint not initialized');
     }
 
-    return await getOrCreateAssociatedTokenAccount(
-      this.connection,
-      userPublicKey, // This should be a Keypair in practice
-      this.mintAddress,
-      userPublicKey
-    );
+    try {
+      // For Web3Auth integration, we can't use the user's wallet as payer
+      // In production, you'd need a separate payer or use a different approach
+      if (payerKeypair) {
+        return await getOrCreateAssociatedTokenAccount(
+          this.connection,
+          payerKeypair,
+          this.mintAddress,
+          userPublicKey
+        );
+      } else {
+        // Alternative: Just get the associated token account address
+        // This won't create it if it doesn't exist, but works for balance checks
+        const associatedTokenAddress = await getAssociatedTokenAddress(
+          this.mintAddress,
+          userPublicKey
+        );
+        
+        try {
+          const accountInfo = await getAccount(this.connection, associatedTokenAddress);
+          return accountInfo;
+        } catch (error) {
+          // Account doesn't exist yet, return a mock structure for demo
+          console.log('Token account not found, user needs to initialize first');
+          throw new Error('Token account not initialized');
+        }
+      }
+    } catch (error) {
+      console.error('Error with token account:', error);
+      throw error;
+    }
   }
 
-  // Get user's JUZ token balance
+  // Get user's JUZ token balance (safe version for Web3Auth)
   async getUserBalance(userPublicKey: PublicKey): Promise<number> {
     try {
-      const tokenAccount = await this.getUserTokenAccount(userPublicKey);
-      const accountInfo = await getAccount(this.connection, tokenAccount.address);
+      if (!this.mintAddress) {
+        console.log('Mint address not set, returning 0 balance');
+        return 0;
+      }
+
+      const associatedTokenAddress = await getAssociatedTokenAddress(
+        this.mintAddress,
+        userPublicKey
+      );
+      
+      const accountInfo = await getAccount(this.connection, associatedTokenAddress);
       return Number(accountInfo.amount);
     } catch (error) {
-      console.error('Error getting user balance:', error);
+      // Account doesn't exist or other error - return 0 for demo
+      console.log('Token balance check failed (account may not exist):', error);
       return 0;
     }
   }

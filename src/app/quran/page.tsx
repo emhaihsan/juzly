@@ -23,12 +23,10 @@ export default async function QuranIndexPage() {
       <main className="mx-auto max-w-5xl px-4 py-6 sm:py-10 space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-3xl sm:text-4xl font-semibold">
-            📖 Mushaf Al-Qur'an
-          </h1>
+          <h1 className="text-3xl sm:text-4xl font-semibold">📖 Holy Quran</h1>
           <p className="text-black/70 max-w-2xl mx-auto">
-            Pilih Juz atau halaman untuk mulai membaca Al-Qur'an dan dapatkan
-            JUZ token sebagai reward.
+            Choose a Juz or page to start reading the Holy Quran and earn JUZ
+            tokens as rewards.
           </p>
         </div>
 
@@ -39,12 +37,12 @@ export default async function QuranIndexPage() {
             className="rounded-xl border border-black/10 bg-gradient-to-br from-green-50 to-emerald-50 p-6 shadow-sm hover:shadow-md transition-shadow group"
           >
             <div className="text-3xl mb-3">🌟</div>
-            <h3 className="text-lg font-semibold mb-2">Mulai dari Awal</h3>
+            <h3 className="text-lg font-semibold mb-2">Start from Beginning</h3>
             <p className="text-sm text-black/70 mb-4">
-              Baca dari Al-Fatihah (Halaman 1) dan dapatkan bonus 2 JUZ token.
+              Read from Al-Fatihah (Page 1) and get bonus 0.1 JUZ tokens.
             </p>
             <div className="text-sm font-medium text-green-700 group-hover:text-green-800">
-              Mulai Membaca →
+              Start Reading →
             </div>
           </Link>
 
@@ -53,12 +51,12 @@ export default async function QuranIndexPage() {
             className="rounded-xl border border-black/10 bg-gradient-to-br from-blue-50 to-sky-50 p-6 shadow-sm hover:shadow-md transition-shadow group"
           >
             <div className="text-3xl mb-3">📍</div>
-            <h3 className="text-lg font-semibold mb-2">Juz 16 (Tengah)</h3>
+            <h3 className="text-lg font-semibold mb-2">Juz 16 (Middle)</h3>
             <p className="text-sm text-black/70 mb-4">
-              Mulai dari pertengahan Al-Qur'an, cocok untuk pembaca reguler.
+              Start from the middle of the Quran, perfect for regular readers.
             </p>
             <div className="text-sm font-medium text-blue-700 group-hover:text-blue-800">
-              Baca Juz 16 →
+              Read Juz 16 →
             </div>
           </Link>
 
@@ -67,12 +65,12 @@ export default async function QuranIndexPage() {
             className="rounded-xl border border-black/10 bg-gradient-to-br from-purple-50 to-violet-50 p-6 shadow-sm hover:shadow-md transition-shadow group"
           >
             <div className="text-3xl mb-3">🎯</div>
-            <h3 className="text-lg font-semibold mb-2">Juz 30 (Akhir)</h3>
+            <h3 className="text-lg font-semibold mb-2">Juz 30 (End)</h3>
             <p className="text-sm text-black/70 mb-4">
-              Baca surat-surat pendek yang familiar, mudah untuk pemula.
+              Read familiar short chapters, easy for beginners.
             </p>
             <div className="text-sm font-medium text-purple-700 group-hover:text-purple-800">
-              Baca Juz 30 →
+              Read Juz 30 →
             </div>
           </Link>
         </section>
@@ -80,9 +78,9 @@ export default async function QuranIndexPage() {
         {/* All Juz Selection */}
         <section className="rounded-xl border border-black/10 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Pilih Juz (1-30)</h2>
+            <h2 className="text-xl font-semibold">Choose Juz (1-30)</h2>
             <div className="text-sm text-black/60">
-              Klik untuk mulai dari halaman pertama Juz
+              Click to start from the first page of Juz
             </div>
           </div>
 
@@ -94,7 +92,7 @@ export default async function QuranIndexPage() {
                 className="flex flex-col items-center justify-center rounded-lg border border-black/10 p-4 text-center hover:bg-black hover:text-white transition-colors group"
               >
                 <div className="text-lg font-bold mb-1">Juz {juz}</div>
-                <div className="text-xs opacity-70">Hal. {start}</div>
+                <div className="text-xs opacity-70">Page {start}</div>
               </Link>
             ))}
           </div>
@@ -102,34 +100,34 @@ export default async function QuranIndexPage() {
 
         {/* Reading Tips */}
         <section className="rounded-xl border border-black/10 bg-gradient-to-r from-orange-50 to-yellow-50 p-6 shadow-sm">
-          <h2 className="text-lg font-semibold mb-3">💡 Tips Membaca</h2>
+          <h2 className="text-lg font-semibold mb-3">💡 Reading Tips</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <span className="text-green-600">✓</span>
-                <span>Minimal 1 menit per halaman untuk mendapat reward</span>
+                <span>Minimum 1 minute per page to earn rewards</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-green-600">✓</span>
-                <span>Halaman 1-2 hanya butuh 30 detik</span>
+                <span>Pages 1-2 only need 30 seconds</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-green-600">✓</span>
-                <span>Dapatkan 1/604 JUZ token per halaman selesai</span>
+                <span>Earn 1/20 JUZ token per completed page</span>
               </div>
             </div>
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <span className="text-blue-600">🎁</span>
-                <span>Bonus 0.5 JUZ untuk Al-Fatihah (halaman 1)</span>
+                <span>Bonus 0.1 JUZ for Al-Fatihah (page 1)</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-purple-600">🏆</span>
-                <span>NFT achievement untuk milestone tertentu</span>
+                <span>NFT achievements for certain milestones</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-orange-600">🔥</span>
-                <span>Tidak ada batas waktu - baca sepuasnya!</span>
+                <span>No time limit - read at your own pace!</span>
               </div>
             </div>
           </div>
