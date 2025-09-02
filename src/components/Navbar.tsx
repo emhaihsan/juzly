@@ -9,23 +9,26 @@ import {
 import { useWeb3AuthUser } from "@web3auth/modal/react";
 import { useSolanaWallet } from "@web3auth/modal/react/solana";
 import { useEffect, useState } from "react";
-import { PublicKey } from "@solana/web3.js";
+import { PublicKey, Connection, clusterApiUrl } from "@solana/web3.js";
 
 export default function Navbar() {
   const pathname = usePathname();
   const { connect, isConnected, connectorName } = useWeb3AuthConnect();
   const { disconnect } = useWeb3AuthDisconnect();
   const { userInfo } = useWeb3AuthUser();
-  const { connection, accounts } = useSolanaWallet();
+  const { accounts } = useSolanaWallet();
   const [balance, setBalance] = useState<number | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const pubkey = accounts?.[0];
 
+  // Use public devnet RPC to avoid 403 errors (same as SolanaDemo)
+  const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
+
   // Navigation items
   const navItems = [
     { href: "/", label: "Home", exact: true },
-    { href: "/quran", label: "Baca Quran" },
+    { href: "/quran", label: "Read Quran" },
     { href: "/marketplace", label: "Marketplace" },
     { href: "/leaderboard", label: "Leaderboard" },
     { href: "/rewards", label: "Rewards" },
@@ -48,7 +51,7 @@ export default function Navbar() {
     if (isConnected) {
       fetchBalance();
     }
-  }, [connection, pubkey, isConnected]);
+  }, [pubkey, isConnected]);
 
   const handleConnect = async () => {
     try {

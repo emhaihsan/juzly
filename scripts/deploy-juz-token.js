@@ -1,7 +1,6 @@
 const {
   Connection,
   Keypair,
-  PublicKey,
   clusterApiUrl,
   LAMPORTS_PER_SOL,
 } = require("@solana/web3.js");
@@ -9,137 +8,140 @@ const {
   createMint,
   getOrCreateAssociatedTokenAccount,
   mintTo,
-  TOKEN_PROGRAM_ID,
 } = require("@solana/spl-token");
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
 
-// Configuration
-const DEVNET_RPC = clusterApiUrl("devnet");
-const DECIMALS = 6; // JUZ token will have 6 decimal places
-const INITIAL_SUPPLY = 1000000; // 1M JUZ tokens for testing
+// Helper to load an existing Solana CLI keypair
+function loadKeypairFromFile(filePath) {
+  const absolutePath = path.isAbsolute(filePath)
+    ? filePath
+    : path.join(os.homedir(), filePath.replace(/^~/, ""));
+  const secretKey = Uint8Array.from(
+    JSON.parse(fs.readFileSync(absolutePath, "utf8"))
+  );
+  return Keypair.fromSecretKey(secretKey);
+}
+
+// Path to your Solana CLI keypair (default: ~/.config/solana/id.json)
+const SOLANA_KEYPAIR_PATH =
+  process.env.SOLANA_KEYPAIR_PATH ||
+  path.join(os.homedir(), ".config/solana/id.json");
+
+// Load existing keypair
+const mintAuthority = loadKeypairFromFile(SOLANA_KEYPAIR_PATH);
+
+// Solana devnet connection
+const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 
 async function deployJuzToken() {
-  console.log("🚀 Deploying JUZ Token on Solana Devnet...\n");
-
-  // Connect to devnet
-  const connection = new Connection(DEVNET_RPC, "confirmed");
-  console.log("✅ Connected to Solana Devnet");
-
-  // Generate or load mint authority keypair
-  let mintAuthority;
-  const keyPath = path.join(__dirname, "juz-mint-authority.json");
-
-  if (fs.existsSync(keyPath)) {
-    console.log("📁 Loading existing mint authority keypair...");
-    const secretKey = JSON.parse(fs.readFileSync(keyPath, "utf8"));
-    mintAuthority = Keypair.fromSecretKey(Uint8Array.from(secretKey));
-  } else {
-    console.log("🔑 Generating new mint authority keypair...");
-    mintAuthority = Keypair.generate();
-    fs.writeFileSync(
-      keyPath,
-      JSON.stringify(Array.from(mintAuthority.secretKey))
-    );
-    console.log(`💾 Saved mint authority to: ${keyPath}`);
-  }
-
-  console.log(`🏦 Mint Authority: ${mintAuthority.publicKey.toString()}`);
-
-  // Check/request airdrop for mint authority
-  const balance = await connection.getBalance(mintAuthority.publicKey);
-  console.log(`💰 Current balance: ${balance / LAMPORTS_PER_SOL} SOL`);
-
-  if (balance < 0.1 * LAMPORTS_PER_SOL) {
-    console.log("💸 Requesting airdrop...");
-    try {
-      const signature = await connection.requestAirdrop(
-        mintAuthority.publicKey,
-        2 * LAMPORTS_PER_SOL
-      );
-      await connection.confirmTransaction(signature);
-      console.log("✅ Airdrop successful!");
-    } catch (error) {
-      console.log(
-        "⚠️ Airdrop failed - you may need to manually fund the wallet"
-      );
-      console.log("Address:", mintAuthority.publicKey.toString());
-    }
-  }
+  console.log("🚀 Starting JUZ Token deployment on Solana Devnet...\n");
 
   try {
-    // Create the JUZ token mint
-    console.log("\n🪙 Creating JUZ token mint...");
-    const mintAddress = await createMint(
+    // Step 1: Use existing mint authority keypair
+    console.log("📝 Step 1: Using existing mint authority keypair...");
+    console.log(
+      "✅ Mint Authority Public Key:",
+      mintAuthority.publicKey.toString()
+    );
+
+    // Step 2: Check SOL balance
+    console.log("\n💰 Step 2: Checking SOL balance for deployment...");
+    const balance = await connection.getBalance(mintAuthority.publicKey);
+    console.log("💰 Current balance:", balance / LAMPORTS_PER_SOL, "SOL");
+    if (balance < 0.05 * LAMPORTS_PER_SOL) {
+      console.warn(
+        "⚠️ Insufficient SOL! You need at least ~0.05 SOL in the mint authority wallet to deploy the token."
+      );
+      console.warn(
+        "Send devnet SOL to:",
+        mintAuthority.publicKey.toString(),
+        "\nYou can use https://solfaucet.com/"
+      );
+      process.exit(1);
+    }
+
+    // Step 3: Create JUZ token mint
+    console.log("\n🪙 Step 3: Creating JUZ token mint...");
+    const mint = await createMint(
       connection,
       mintAuthority, // Payer
       mintAuthority.publicKey, // Mint authority
-      mintAuthority.publicKey, // Freeze authority (optional)
-      DECIMALS // Decimals
+      null, // Freeze authority (none)
+      6 // Decimals
     );
 
-    console.log(`✅ JUZ Token Mint Created: ${mintAddress.toString()}`);
+    console.log("✅ JUZ Token Mint created!");
+    console.log("🔗 Mint Address:", mint.toString());
 
-    // Create associated token account for mint authority
-    console.log("\n💼 Creating token account for mint authority...");
-    const tokenAccount = await getOrCreateAssociatedTokenAccount(
+    // Step 4: Create associated token account for mint authority
+    console.log("\n💼 Step 4: Creating token account for mint authority...");
+    const mintAuthorityTokenAccount = await getOrCreateAssociatedTokenAccount(
       connection,
       mintAuthority,
-      mintAddress,
+      mint,
       mintAuthority.publicKey
     );
 
-    console.log(`✅ Token Account: ${tokenAccount.address.toString()}`);
-
-    // Mint initial supply
     console.log(
-      `\n⚡ Minting initial supply of ${INITIAL_SUPPLY} JUZ tokens...`
+      "✅ Token account created:",
+      mintAuthorityTokenAccount.address.toString()
     );
-    const mintTx = await mintTo(
+
+    // Step 5: Mint initial supply (1 billion JUZ tokens)
+    console.log("\n🏭 Step 5: Minting initial token supply...");
+    const initialSupply = 1_000_000_000 * Math.pow(10, 6); // 1B tokens with 6 decimals
+
+    await mintTo(
       connection,
       mintAuthority,
-      mintAddress,
-      tokenAccount.address,
+      mint,
+      mintAuthorityTokenAccount.address,
       mintAuthority.publicKey,
-      INITIAL_SUPPLY * Math.pow(10, DECIMALS) // Convert to smallest units
+      initialSupply
     );
 
-    console.log(`✅ Minted tokens! Transaction: ${mintTx}`);
+    console.log("✅ Minted", initialSupply / Math.pow(10, 6), "JUZ tokens");
 
-    // Save deployment info
-    const deploymentInfo = {
+    // Step 6: Save configuration
+    console.log("\n💾 Step 6: Saving deployment configuration...");
+
+    const deploymentConfig = {
       network: "devnet",
-      mintAddress: mintAddress.toString(),
+      mintAddress: mint.toString(),
       mintAuthority: mintAuthority.publicKey.toString(),
-      decimals: DECIMALS,
-      initialSupply: INITIAL_SUPPLY,
-      tokenAccount: tokenAccount.address.toString(),
-      deployedAt: new Date().toISOString(),
-      rpcEndpoint: DEVNET_RPC,
+      deploymentTime: new Date().toISOString(),
+      initialSupply: initialSupply,
+      decimals: 6,
+      explorer: `https://explorer.solana.com/address/${mint.toString()}?cluster=devnet`,
     };
 
-    const infoPath = path.join(__dirname, "juz-deployment-info.json");
-    fs.writeFileSync(infoPath, JSON.stringify(deploymentInfo, null, 2));
-    console.log(`\n📄 Deployment info saved to: ${infoPath}`);
-
-    // Generate environment variable
-    console.log("\n🔧 Environment Variables for your .env file:");
-    console.log(`NEXT_PUBLIC_JUZ_TOKEN_MINT_ADDRESS=${mintAddress.toString()}`);
-    console.log(
-      `JUZ_MINT_AUTHORITY_PRIVATE_KEY=${JSON.stringify(
-        Array.from(mintAuthority.secretKey)
-      )}`
+    // Save deployment config
+    fs.writeFileSync(
+      "juz-deployment-config.json",
+      JSON.stringify(deploymentConfig, null, 2)
     );
 
-    console.log("\n✅ JUZ Token deployment complete!");
-    console.log("\n📋 Summary:");
-    console.log(`   Token Mint: ${mintAddress.toString()}`);
-    console.log(`   Decimals: ${DECIMALS}`);
-    console.log(`   Initial Supply: ${INITIAL_SUPPLY} JUZ`);
-    console.log(`   Network: Solana Devnet`);
+    console.log("\n🎉 JUZ Token Deployment Complete!");
+    console.log("=".repeat(50));
+    console.log("📋 Deployment Summary:");
+    console.log("• Mint Address:", mint.toString());
+    console.log("• Network: Solana Devnet");
+    console.log("• Total Supply: 1,000,000,000 JUZ");
+    console.log("• Decimals: 6");
+    console.log("• Explorer:", deploymentConfig.explorer);
+    console.log("=".repeat(50));
+
+    console.log("\n📝 Next Steps:");
+    console.log("1. Add NEXT_PUBLIC_JUZ_TOKEN_MINT_ADDRESS to your .env.local");
     console.log(
-      `   Explorer: https://explorer.solana.com/address/${mintAddress.toString()}?cluster=devnet`
+      "2. Keep your Solana keypair file secure (DO NOT commit to git)"
     );
+    console.log("3. Test wallet connection and token operations");
+
+    console.log("\n🔧 Environment Variable:");
+    console.log(`NEXT_PUBLIC_JUZ_TOKEN_MINT_ADDRESS=${mint.toString()}`);
   } catch (error) {
     console.error("❌ Deployment failed:", error);
     process.exit(1);
@@ -147,12 +149,4 @@ async function deployJuzToken() {
 }
 
 // Run deployment
-deployJuzToken()
-  .then(() => {
-    console.log("\n🎉 Deployment script completed successfully!");
-    process.exit(0);
-  })
-  .catch((error) => {
-    console.error("💥 Deployment script failed:", error);
-    process.exit(1);
-  });
+deployJuzToken();

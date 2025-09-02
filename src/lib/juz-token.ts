@@ -107,6 +107,19 @@ export const MERCHANDISE_CATALOG = [
   }
 ];
 
+// Get JUZ token mint address from environment
+const JUZ_TOKEN_MINT = process.env.NEXT_PUBLIC_JUZ_TOKEN_MINT_ADDRESS;
+
+if (!JUZ_TOKEN_MINT) {
+  console.warn('⚠️ JUZ_TOKEN_MINT_ADDRESS not set in environment variables');
+}
+
+// Connection to Solana devnet
+export const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
+
+// JUZ Token mint public key
+export const juzTokenMint = JUZ_TOKEN_MINT ? new PublicKey(JUZ_TOKEN_MINT) : null;
+
 export class JuzTokenManager {
   private connection: Connection;
   private mintAddress: PublicKey | null = null;
@@ -192,7 +205,7 @@ export class JuzTokenManager {
     }
   }
 
-  // Get user's JUZ token balance (safe version for Web3Auth)
+  // Get user's JUZ token balance
   async getUserBalance(userPublicKey: PublicKey): Promise<number> {
     try {
       if (!this.mintAddress) {
@@ -358,6 +371,113 @@ export class JuzTokenManager {
       affordable: userBalance >= item.price,
       priceInJuz: item.price / 1_000_000, // Convert to human-readable JUZ
     }));
+  }
+}
+
+/**
+ * Get user's JUZ token balance
+ */
+export async function getUserJuzBalance(userPublicKey: PublicKey): Promise<number> {
+  if (!juzTokenMint) {
+    console.warn('JUZ token mint not configured');
+    return 0;
+  }
+
+  try {
+    const tokenAccountAddress = await getAssociatedTokenAddress(
+      juzTokenMint,
+      userPublicKey,
+      false,
+      TOKEN_PROGRAM_ID,
+      ASSOCIATED_TOKEN_PROGRAM_ID
+    );
+
+    const tokenAccount = await getAccount(connection, tokenAccountAddress);
+    return Number(tokenAccount.amount) / Math.pow(10, JUZ_TOKEN_CONFIG.decimals);
+  } catch (error) {
+    console.log('User has no JUZ token account yet:', error);
+    return 0;
+  }
+}
+
+/**
+ * Create token account for user if it doesn't exist
+ */
+export async function createUserTokenAccount(
+  userPublicKey: PublicKey,
+  payerKeypair: Keypair
+): Promise<PublicKey> {
+  if (!juzTokenMint) {
+    throw new Error('JUZ token mint not configured');
+  }
+
+  const tokenAccount = await getOrCreateAssociatedTokenAccount(
+    connection,
+    payerKeypair,
+    juzTokenMint,
+    userPublicKey
+  );
+
+  return tokenAccount.address;
+}
+
+/**
+ * Mint JUZ tokens to user (for rewards)
+ * This would typically be called from a backend service with mint authority
+ */
+export async function mintJuzTokensToUser(
+  userPublicKey: PublicKey,
+  amount: number,
+  mintAuthorityKeypair: Keypair
+): Promise<string> {
+  if (!juzTokenMint) {
+    throw new Error('JUZ token mint not configured');
+  }
+
+  // Get or create user's token account
+  const userTokenAccount = await getOrCreateAssociatedTokenAccount(
+    connection,
+    mintAuthorityKeypair,
+    juzTokenMint,
+    userPublicKey
+  );
+
+  // Convert amount to token units (with decimals)
+  const tokenAmount = amount * Math.pow(10, JUZ_TOKEN_CONFIG.decimals);
+
+  // Mint tokens to user
+  const signature = await mintTo(
+    connection,
+    mintAuthorityKeypair,
+    juzTokenMint,
+    userTokenAccount.address,
+    mintAuthorityKeypair.publicKey,
+    tokenAmount
+  );
+
+  console.log('✅ Minted', amount, 'JUZ tokens to user. Transaction:', signature);
+  return signature;
+}
+
+/**
+ * Check if user has JUZ token account
+ */
+export async function userHasJuzTokenAccount(userPublicKey: PublicKey): Promise<boolean> {
+  if (!juzTokenMint) return false;
+
+  try {
+    const tokenAccountAddress = await getAssociatedTokenAddress(
+      juzTokenMint,
+      userPublicKey,
+      false,
+      TOKEN_PROGRAM_ID,
+      ASSOCIATED_TOKEN_PROGRAM_ID
+    );
+
+    await getAccount(connection, tokenAccountAddress);
+    return true;
+  } catch {
+    return false;
   }
 }
 
