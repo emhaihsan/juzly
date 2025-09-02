@@ -2,14 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useWeb3AuthConnect } from "@web3auth/modal/react";
+import {
+  useWeb3AuthConnect,
+  useWeb3AuthDisconnect,
+} from "@web3auth/modal/react";
 import { useWeb3AuthUser } from "@web3auth/modal/react";
 import { useSolanaWallet } from "@web3auth/modal/react/solana";
 import { useEffect, useState } from "react";
+import { PublicKey } from "@solana/web3.js";
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { connect, disconnect, isConnected } = useWeb3AuthConnect();
+  const { connect, isConnected, connectorName } = useWeb3AuthConnect();
+  const { disconnect } = useWeb3AuthDisconnect();
   const { userInfo } = useWeb3AuthUser();
   const { connection, accounts } = useSolanaWallet();
   const [balance, setBalance] = useState<number | null>(null);
@@ -30,7 +35,8 @@ export default function Navbar() {
     const fetchBalance = async () => {
       if (connection && pubkey) {
         try {
-          const bal = await connection.getBalance(pubkey);
+          const publicKey = new PublicKey(pubkey);
+          const bal = await connection.getBalance(publicKey);
           setBalance(bal / 1e9); // Convert lamports to SOL
         } catch (error) {
           console.error("Error fetching balance:", error);
@@ -46,9 +52,7 @@ export default function Navbar() {
 
   const handleConnect = async () => {
     try {
-      await connect({
-        connectorName: "solana",
-      });
+      await connect();
     } catch (error) {
       console.error("Connection failed:", error);
     }
@@ -108,6 +112,11 @@ export default function Navbar() {
                 >
                   <div className="text-xs">
                     <div className="font-medium">
+                      {connectorName && (
+                        <span className="text-green-600">{connectorName}</span>
+                      )}
+                    </div>
+                    <div className="font-medium">
                       {pubkey?.slice(0, 4)}...{pubkey?.slice(-4)}
                     </div>
                     {balance !== null && (
@@ -124,7 +133,7 @@ export default function Navbar() {
                   <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-black/10 py-2">
                     <div className="px-4 py-2 border-b border-black/10">
                       <div className="text-sm font-medium">
-                        Connected Wallet
+                        Connected via {connectorName}
                       </div>
                       <div className="text-xs text-black/60 font-mono">
                         {pubkey}
