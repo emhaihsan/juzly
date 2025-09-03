@@ -20,22 +20,22 @@ const DONATION_PRESETS = [
 // Islamic charity organizations (example addresses - replace with real ones)
 const CHARITY_ORGANIZATIONS = [
   {
-    name: "Muslim Blockchain Society",
+    name: "Global Education Fund",
     address: "9q3335MQfBQuCkkUBdeXgrsXkbVTjvLxBAeyq11JPNdK",
     description:
-      "Empowering the global Muslim community through blockchain technology",
+      "Supporting education initiatives for underprivileged communities worldwide",
   },
   {
-    name: "Blockchain Education for Muslims",
+    name: "Health for All Foundation",
     address: "3JDJbu8KH58ViKV8BfFtH3xwXgtdvoAwgUwfGbfz8j68",
     description:
-      "Promoting blockchain literacy and opportunities for Muslims worldwide",
+      "Providing access to healthcare and medical resources globally",
   },
   {
-    name: "Islamic Blockchain Relief",
+    name: "Disaster Relief Network",
     address: "Dd1RRKveoFxZeGXfmjteDvA4MxD5oibpqF3qTfg8DZTC",
     description:
-      "Supporting humanitarian initiatives powered by blockchain for Muslim societies",
+      "Offering rapid humanitarian aid and disaster relief response services",
   },
 ];
 
@@ -129,15 +129,15 @@ export default function DonationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-black">
+    <div className="min-h-screen bg-black text-white">
       <div className="mx-auto w-full max-w-4xl px-4 py-10">
         {/* Header */}
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold mb-3">💝 Make a Donation</h1>
-          <p className="text-lg text-black/70 mb-2">
+          <p className="text-lg text-white/80 mb-2">
             Support Islamic causes through blockchain technology
           </p>
-          <p className="text-sm text-black/60">
+          <p className="text-sm text-white/60">
             "The believer's shade on the Day of Resurrection will be their
             charity" - Prophet Muhammad ﷺ
           </p>
@@ -156,24 +156,24 @@ export default function DonationPage() {
                     key={index}
                     className={`p-4 border rounded-lg cursor-pointer transition-colors ${
                       selectedCharity === index
-                        ? "border-blue-500 bg-blue-50"
-                        : "border-gray-200 hover:border-gray-300"
+                        ? "border-white bg-white/10"
+                        : "border-white/20 hover:border-white/40"
                     }`}
                     onClick={() => setSelectedCharity(index)}
                   >
                     <div className="flex items-start justify-between">
                       <div>
                         <h3 className="font-medium">{org.name}</h3>
-                        <p className="text-sm text-black/60 mt-1">
+                        <p className="text-sm text-white/60 mt-1">
                           {org.description}
                         </p>
-                        <p className="text-xs text-black/40 mt-1 font-mono">
+                        <p className="text-xs text-white/40 mt-1 font-mono">
                           {org.address.slice(0, 8)}...{org.address.slice(-8)}
                         </p>
                       </div>
                       {selectedCharity === index && (
-                        <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
-                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                        <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center">
+                          <div className="w-2 h-2 bg-black rounded-full"></div>
                         </div>
                       )}
                     </div>
@@ -183,13 +183,13 @@ export default function DonationPage() {
             </div>
 
             {/* Islamic Quote */}
-            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-sm text-green-800 italic">
+            <div className="p-4 bg-white/5 border border-white/20 rounded-lg">
+              <p className="text-sm text-white/80 italic">
                 "Whoever relieves a Muslim of a burden from the burdens of the
                 world, Allah will relieve him of a burden from the burdens on
                 the Day of Judgment."
               </p>
-              <p className="text-xs text-green-600 mt-1">
+              <p className="text-xs text-white/60 mt-1">
                 - Hadith Sahih Muslim
               </p>
             </div>
@@ -207,10 +207,10 @@ export default function DonationPage() {
                     key={index}
                     onClick={() => generateQrCode(preset.amount)}
                     disabled={isLoading || !isConnected}
-                    className="p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors disabled:opacity-50 text-left"
+                    className="p-4 border border-white/20 rounded-lg hover:border-white hover:bg-white/5 transition-colors disabled:opacity-50 text-left"
                   >
                     <div className="font-semibold">{preset.label}</div>
-                    <div className="text-sm text-black/60">
+                    <div className="text-sm text-white/60">
                       {preset.description}
                     </div>
                   </button>
@@ -228,14 +228,14 @@ export default function DonationPage() {
                     placeholder="0.00"
                     value={customAmount}
                     onChange={(e) => setCustomAmount(e.target.value)}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="flex-1 px-4 py-2 border border-white/30 rounded-lg bg-black text-white placeholder-white/40 focus:ring-2 focus:ring-white focus:border-transparent"
                     step="0.01"
                     min="0"
                   />
                   <button
                     onClick={handleCustomDonation}
                     disabled={isLoading || !isConnected || !customAmount}
-                    className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-colors"
+                    className="px-6 py-2 bg-white text-black rounded-lg hover:bg-white/90 disabled:opacity-50 transition-colors"
                   >
                     {isLoading ? "Generating..." : "Donate"}
                   </button>
@@ -245,13 +245,13 @@ export default function DonationPage() {
 
             {/* Connection Status */}
             {!isConnected && (
-              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-sm text-yellow-800">
+              <div className="p-4 bg-white/5 border border-white/20 rounded-lg">
+                <p className="text-sm text-white/80">
                   Please connect your wallet to make donations
                 </p>
                 <Link
                   href="/"
-                  className="text-sm text-blue-600 hover:underline mt-2 inline-block"
+                  className="text-sm text-white hover:text-white/80 mt-2 inline-block"
                 >
                   Go to home page to connect wallet →
                 </Link>
@@ -260,8 +260,8 @@ export default function DonationPage() {
 
             {/* Error Display */}
             {error && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-800">❌ {error}</p>
+              <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+                <p className="text-sm text-red-400">❌ {error}</p>
               </div>
             )}
           </div>
@@ -271,23 +271,23 @@ export default function DonationPage() {
         {showModal &&
           createPortal(
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-xl max-w-md w-full p-6">
+              <div className="bg-black border border-white/20 rounded-xl max-w-md w-full p-6">
                 <div className="text-center">
                   <h3 className="text-xl font-semibold mb-2">
                     📱 Scan to Donate
                   </h3>
-                  <p className="text-sm text-black/60 mb-4">
+                  <p className="text-sm text-white/60 mb-4">
                     Scan this QR code with any Solana wallet
                   </p>
 
                   <div className="flex justify-center mb-4">
                     <div
                       ref={qrRef}
-                      className="border border-gray-200 rounded-lg p-4 bg-white"
+                      className="border border-white/20 rounded-lg p-4 bg-white"
                     ></div>
                   </div>
 
-                  <div className="text-sm text-black/60 mb-4">
+                  <div className="text-sm text-white/60 mb-4">
                     <p>
                       Donating to:{" "}
                       <strong>
@@ -297,7 +297,7 @@ export default function DonationPage() {
                   </div>
 
                   {error && (
-                    <div className="text-sm text-red-600 mb-4">
+                    <div className="text-sm text-red-400 mb-4">
                       Error: {error}
                     </div>
                   )}
@@ -305,13 +305,13 @@ export default function DonationPage() {
                   <div className="flex gap-3">
                     <button
                       onClick={closeModal}
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                      className="flex-1 px-4 py-2 border border-white/30 rounded-lg hover:bg-white/5 transition-colors"
                     >
                       Close
                     </button>
                     <button
                       onClick={() => navigator.clipboard.writeText(qrUrl)}
-                      className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                      className="flex-1 px-4 py-2 bg-white text-black rounded-lg hover:bg-white/90 transition-colors"
                     >
                       Copy Link
                     </button>

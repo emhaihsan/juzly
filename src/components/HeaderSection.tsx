@@ -194,56 +194,64 @@ export default function HeaderSection() {
   const hijri = formatHijriEN(todayStatic);
 
   return (
-    <section className="rounded-2xl border border-black/10 bg-white text-black p-4 sm:p-6 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="text-xl sm:text-2xl font-bold tracking-wide">
-            {weekdayEN} <span className="opacity-70">/ {weekdayAR}</span>
+    <section className="border border-white/10 bg-black text-white p-6">
+      <div className="flex items-start justify-between gap-6">
+        <div className="flex-1">
+          <div className="text-2xl font-bold tracking-wider mb-2">
+            {weekdayEN}{" "}
+            <span className="text-white/40 font-mono text-lg">
+              / {weekdayAR}
+            </span>
           </div>
-          <div className="text-sm sm:text-base opacity-90 mt-1">
-            {greg} <span className="opacity-60">/ {hijri}</span>
-          </div>
+          <div className="text-sm text-white/80 font-mono">{greg}</div>
+          <div className="text-xs text-white/60 mt-1 font-mono">{hijri}</div>
         </div>
-        <div className="text-xs sm:text-sm opacity-80 flex items-center gap-1">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            aria-hidden
-          >
-            <path d="M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z" />
-          </svg>
-          <span className="truncate max-w-[200px] sm:max-w-[280px]">
+        <div className="text-right">
+          <div className="flex items-center gap-2 text-xs text-white/60 mb-2">
+            <div className="w-2 h-2 border border-white/30 rounded-full"></div>
+            <span className="font-mono uppercase tracking-wider">LOCATION</span>
+          </div>
+          <div className="text-sm text-white/80 font-mono max-w-[200px] text-right">
             {place ||
               (coords
                 ? `${coords.lat.toFixed(3)}, ${coords.lng.toFixed(3)}`
-                : "-")}
-          </span>
+                : "---")}
+          </div>
         </div>
       </div>
 
-      <div className="mt-4 rounded-xl bg-black/5 p-3 sm:p-4">
-        <div className="text-xs opacity-80">Next prayer</div>
+      <div className="mt-6 border border-white/10 bg-white/5 p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-2 h-2 bg-white rounded-full"></div>
+          <div className="text-xs text-white/60 font-mono uppercase tracking-wider">
+            NEXT PRAYER
+          </div>
+        </div>
         {nextPrayer ? (
-          <div className="mt-1 flex items-center justify-between">
-            <div className="text-base sm:text-lg font-semibold">
-              {nextPrayer.name}{" "}
-              <span className="opacity-80">
-                •{" "}
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-lg font-bold tracking-wide">
+                {nextPrayer.name.toUpperCase()}
+              </div>
+              <div className="text-sm text-white/80 font-mono">
                 {nextPrayer.time.toLocaleTimeString("en-GB", {
                   hour: "2-digit",
                   minute: "2-digit",
                 })}
-              </span>
+              </div>
             </div>
-            <div className="text-xs sm:text-sm opacity-80">
-              {diffToHMSLabel(nextPrayer.remainingMs)}
+            <div className="text-right">
+              <div className="text-xs text-white/60 font-mono uppercase">
+                TIME LEFT
+              </div>
+              <div className="text-sm text-white/80 font-mono">
+                {diffToHMSLabel(nextPrayer.remainingMs)}
+              </div>
             </div>
           </div>
         ) : (
-          <div className="mt-1 text-sm opacity-80">
-            Waiting for location/schedule...
+          <div className="text-sm text-white/60 font-mono">
+            WAITING FOR LOCATION DATA...
           </div>
         )}
       </div>
