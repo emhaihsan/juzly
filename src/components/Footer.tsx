@@ -8,7 +8,6 @@ export default function Footer() {
               <span className="text-white font-bold text-sm">ج</span>
             </div>
             <span className="text-white font-bold tracking-wider">JUZLY</span>
-            <span className="text-xs text-white/40 font-mono">BETA</span>
           </div>
 
           <div className="flex items-center gap-8 text-xs text-white/60 font-mono">

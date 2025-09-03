@@ -217,7 +217,7 @@ export default function LeaderboardPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <main className="mx-auto max-w-5xl px-4 py-6 sm:py-10 space-y-6">
+      <main className="mx-auto max-w-6xl px-4 py-6 sm:py-10 space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl sm:text-3xl font-semibold">

@@ -130,7 +130,7 @@ export default function DonationPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="mx-auto w-full max-w-4xl px-4 py-10">
+      <div className="mx-auto max-w-6xl px-4 py-6 sm:py-10 space-y-6">
         {/* Header */}
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold mb-3">💝 Make a Donation</h1>
@@ -141,6 +141,35 @@ export default function DonationPage() {
             "The believer's shade on the Day of Resurrection will be their
             charity" - Prophet Muhammad ﷺ
           </p>
+        </div>
+
+        {/* Testnet Limitation Notice */}
+        <div className="rounded-xl border border-orange-500/30 bg-orange-500/10 p-4 sm:p-6">
+          <div className="flex items-start gap-3">
+            <span className="text-orange-400 text-xl">⚠️</span>
+            <div>
+              <div className="font-semibold text-orange-400 mb-2">
+                Testnet Environment Limitation
+              </div>
+              <div className="text-sm text-orange-300 space-y-2">
+                <p>
+                  <strong>Important:</strong> Solana Pay functionality is
+                  currently limited on Devnet/Testnet. You may encounter the
+                  following issues:
+                </p>
+                <ul className="list-disc list-inside space-y-1 ml-4 text-orange-300/90">
+                  <li>QR codes may not scan properly in wallet apps</li>
+                  <li>Payment requests might fail or timeout</li>
+                  <li>Transaction processing may be inconsistent</li>
+                </ul>
+                <p className="pt-2">
+                  <strong>For Production:</strong> These features work
+                  seamlessly on Solana Mainnet. This is a demonstration
+                  environment showcasing the integration capabilities.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
@@ -273,7 +302,7 @@ export default function DonationPage() {
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
               <div className="bg-black border border-white/20 rounded-xl max-w-md w-full p-6">
                 <div className="text-center">
-                  <h3 className="text-xl font-semibold mb-2">
+                  <h3 className="text-xl font-semibold mb-2 text-white">
                     📱 Scan to Donate
                   </h3>
                   <p className="text-sm text-white/60 mb-4">
@@ -305,7 +334,7 @@ export default function DonationPage() {
                   <div className="flex gap-3">
                     <button
                       onClick={closeModal}
-                      className="flex-1 px-4 py-2 border border-white/30 rounded-lg hover:bg-white/5 transition-colors"
+                      className="flex-1 px-4 py-2 border border-white/30 rounded-lg hover:bg-white/5 text-white transition-colors"
                     >
                       Close
                     </button>

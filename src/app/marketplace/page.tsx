@@ -90,17 +90,6 @@ export default function MarketplacePage() {
               Redeem your reading rewards for Islamic merchandise
             </p>
           </div>
-          <div className="text-right">
-            <div className="text-sm text-white/60">Your Balance</div>
-            <div className="text-2xl font-bold text-green-400">
-              {isConnected ? formatJuzAmount(juzBalance) : "0.00"} JUZ
-            </div>
-            <div className="text-xs text-white/50">
-              {isConnected
-                ? `${pubkey?.slice(0, 4)}...${pubkey?.slice(-4)}`
-                : "Not connected"}
-            </div>
-          </div>
         </div>
 
         {/* Connection Notice */}

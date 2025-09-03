@@ -208,7 +208,6 @@ export default function Navbar() {
               <span className="text-xl font-bold text-white tracking-wider">
                 JUZLY
               </span>
-              <span className="text-xs text-white/40 ml-2 font-mono">BETA</span>
             </div>
           </Link>
 

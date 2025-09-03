@@ -7,7 +7,7 @@ import Link from "next/link";
 export default function Home() {
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 space-y-12">
+      <main className="mx-auto max-w-6xl px-4 py-6 sm:py-10 space-y-6 flex-1">
         <HeaderSection />
         {/* Hero Section */}
         <section className="text-center py-16">

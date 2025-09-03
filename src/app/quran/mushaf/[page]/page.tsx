@@ -49,7 +49,7 @@ export default async function MushafPage({ params }: Props) {
   if (!data) {
     return (
       <div className="min-h-screen bg-black text-white">
-        <main className="mx-auto max-w-5xl px-4 py-6 sm:py-10 space-y-4">
+        <main className="mx-auto max-w-6xl px-4 py-6 sm:py-10 space-y-6">
           <h1 className="text-2xl sm:text-3xl font-semibold">Mushaf</h1>
           <p className="text-sm text-white/70">
             Page {pageNum} • quran-uthmani
@@ -72,28 +72,23 @@ export default async function MushafPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <main className="mx-auto max-w-5xl px-4 py-6 sm:py-10 space-y-6">
-        <div className="flex items-center justify-between">
+      <main className="mx-auto max-w-6xl px-4 py-6 sm:py-10 space-y-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm text-white/60">Mushaf</p>
             <h1 className="text-2xl sm:text-3xl font-semibold">
               Page {pageNum}
             </h1>
-            <p className="text-sm text-white/60">Edition: Mushaf Uthmani</p>
-            {error && (
-              <p className="text-xs text-white/60 mt-1">
-                Note: {error}. Showing cached data if available.
-              </p>
-            )}
+            <p className="text-sm text-white/70">
+              Mushaf Uthmani <span className="mx-2">•</span>
+              <span className="font-[var(--font-amiri)] text-base text-white/80">
+                مصحف عثماني
+              </span>
+            </p>
           </div>
-          {/* Navigation with claim functionality */}
-          <NavigationButtons
-            currentPage={pageNum}
-            prevPage={prev}
-            nextPage={next}
-          />
+          <div className="flex items-center gap-2">
+            <ReadTimer page={pageNum} />
+          </div>
         </div>
-        <ReadTimer page={pageNum} />
         <div className="space-y-4">
           {items.map((v) => (
             <div
@@ -107,6 +102,11 @@ export default async function MushafPage({ params }: Props) {
             </div>
           ))}
         </div>
+        <NavigationButtons
+          currentPage={pageNum}
+          prevPage={prev}
+          nextPage={next}
+        />
       </main>
     </div>
   );
