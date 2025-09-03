@@ -59,49 +59,36 @@ export default function NavigationButtons({
         href={prevPage ? `/quran/mushaf/${prevPage}` : "#"}
         className={`inline-flex items-center rounded-md border px-3 py-1.5 text-sm transition-colors ${
           prevPage
-            ? "border-black hover:bg-black hover:text-white"
-            : "border-black/20 text-black/40 cursor-not-allowed pointer-events-none"
+            ? "border-white/30 hover:bg-white hover:text-black"
+            : "border-white/20 text-white/40 cursor-not-allowed pointer-events-none"
         }`}
       >
         ← Prev
       </Link>
-
-      {/* Rewards Status */}
-      {isConnected && pubkey && canClaim && (
-        <Link
-          href="/rewards"
-          className="inline-flex items-center rounded-md border border-orange-500 bg-orange-50 text-orange-700 px-3 py-1.5 text-xs font-medium hover:bg-orange-100 transition-colors"
-        >
-          💰 {(pendingRewards / 1_000_000).toFixed(1)} JUZ to mint
-        </Link>
-      )}
 
       {/* Next Button - Enhanced with Claim Status */}
       {nextPage ? (
         canClaim ? (
           <Link
             href={`/quran/mushaf/${nextPage}`}
-            className="inline-flex items-center rounded-md border border-green-600 bg-green-50 text-green-700 px-4 py-1.5 text-sm font-medium hover:bg-green-600 hover:text-white transition-colors"
+            className="inline-flex items-center rounded-md border border-white/30 bg-white/10 text-white px-4 py-1.5 text-sm font-medium hover:bg-white hover:text-black transition-colors"
           >
-            Next & Claim More →
-            <span className="ml-1 text-xs">
-              ({(pendingRewards / 1_000_000).toFixed(1)} JUZ)
-            </span>
+            Claim & Next →
           </Link>
         ) : (
           <Link
             href={`/quran/mushaf/${nextPage}`}
-            className="inline-flex items-center rounded-md border border-black px-3 py-1.5 text-sm hover:bg-black hover:text-white transition-colors"
+            className="inline-flex items-center rounded-md border border-white/30 px-3 py-1.5 text-sm hover:bg-white hover:text-black transition-colors"
           >
             Next →
           </Link>
         )
       ) : (
-        <div className="inline-flex items-center rounded-md border border-black/20 text-black/40 px-3 py-1.5 text-sm cursor-not-allowed">
+        <div className="inline-flex items-center rounded-md border border-white/20 text-white/40 px-3 py-1.5 text-sm cursor-not-allowed">
           {canClaim ? (
             <Link
               href="/rewards"
-              className="text-green-600 hover:text-green-800 font-medium"
+              className="text-white hover:text-white/80 font-medium"
             >
               🎉 Quran Complete! Claim Rewards
             </Link>

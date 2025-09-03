@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Amiri } from "next/font/google";
 import "./globals.css";
 import Web3AuthRootProvider from "@/components/providers/Web3AuthRootProvider";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,6 +40,7 @@ export default function RootLayout({
         <Web3AuthRootProvider>
           <Navbar />
           {children}
+          <Footer />
         </Web3AuthRootProvider>
       </body>
     </html>

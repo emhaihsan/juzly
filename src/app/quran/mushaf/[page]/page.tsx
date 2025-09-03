@@ -48,13 +48,13 @@ export default async function MushafPage({ params }: Props) {
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-white text-black">
+      <div className="min-h-screen bg-black text-white">
         <main className="mx-auto max-w-5xl px-4 py-6 sm:py-10 space-y-4">
           <h1 className="text-2xl sm:text-3xl font-semibold">Mushaf</h1>
-          <p className="text-sm text-black/70">
+          <p className="text-sm text-white/70">
             Page {pageNum} • quran-uthmani
           </p>
-          <div className="rounded-lg border border-black/10 p-4 text-sm text-red-600">
+          <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
             {error}
           </div>
         </main>
@@ -71,17 +71,17 @@ export default async function MushafPage({ params }: Props) {
   const next = pageNum < 604 ? pageNum + 1 : null;
 
   return (
-    <div className="min-h-screen bg-white text-black">
+    <div className="min-h-screen bg-black text-white">
       <main className="mx-auto max-w-5xl px-4 py-6 sm:py-10 space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-black/60">Mushaf</p>
+            <p className="text-sm text-white/60">Mushaf</p>
             <h1 className="text-2xl sm:text-3xl font-semibold">
               Page {pageNum}
             </h1>
-            <p className="text-sm text-black/60">Edition: quran-uthmani</p>
+            <p className="text-sm text-white/60">Edition: Mushaf Uthmani</p>
             {error && (
-              <p className="text-xs text-black/60 mt-1">
+              <p className="text-xs text-white/60 mt-1">
                 Note: {error}. Showing cached data if available.
               </p>
             )}
@@ -98,12 +98,12 @@ export default async function MushafPage({ params }: Props) {
           {items.map((v) => (
             <div
               key={v.key + v.ar}
-              className="rounded-lg border border-black/10 p-4"
+              className="rounded-lg border border-white/10 bg-white/5 p-4"
             >
               <div className="text-right text-xl leading-relaxed font-[var(--font-amiri)]">
                 {v.ar}
               </div>
-              <div className="text-xs text-black/50 mt-1">Ayah {v.key}</div>
+              <div className="text-xs text-white/50 mt-1">Ayah {v.key}</div>
             </div>
           ))}
         </div>

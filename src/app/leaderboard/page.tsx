@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useWeb3AuthConnect } from "@web3auth/modal/react";
 import { useSolanaWallet } from "@web3auth/modal/react/solana";
 import { PublicKey } from "@solana/web3.js";
-import { JuzTokenManager } from "@/lib/juz-token";
 
 const LS_BALANCES = "r2e_balances";
 const LS_PAGES_READ = "r2e_pages_read";
@@ -217,34 +216,34 @@ export default function LeaderboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-black">
+    <div className="min-h-screen bg-black text-white">
       <main className="mx-auto max-w-5xl px-4 py-6 sm:py-10 space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl sm:text-3xl font-semibold">
               Active Leaderboard 🏆
             </h1>
-            <p className="text-sm text-black/60">
+            <p className="text-sm text-white/60">
               Live rankings • Updates every 5 seconds
               {myRank && ` • Your rank: #${myRank}`}
             </p>
           </div>
           <Link
             href="/rewards"
-            className="inline-flex items-center rounded-md border border-black px-3 py-1.5 text-sm hover:bg-black hover:text-white transition-colors"
+            className="inline-flex items-center rounded-md border border-white/30 px-3 py-1.5 text-sm hover:bg-white hover:text-black transition-colors"
           >
             My Rewards
           </Link>
         </div>
 
         {/* View Toggle */}
-        <div className="flex gap-2 p-1 bg-black/5 rounded-lg w-fit">
+        <div className="flex gap-2 p-1 bg-white/5 rounded-lg w-fit">
           {(["weekly", "monthly", "all-time"] as const).map((v) => (
             <button
               key={v}
               onClick={() => setView(v)}
               className={`px-3 py-1.5 text-sm rounded-md transition-colors capitalize ${
-                view === v ? "bg-black text-white" : "hover:bg-black/10"
+                view === v ? "bg-white text-black" : "hover:bg-white/10"
               }`}
             >
               {v === "all-time" ? "All Time" : v}
@@ -253,8 +252,8 @@ export default function LeaderboardPage() {
         </div>
 
         {/* Current Period Info */}
-        <div className="rounded-xl border border-black/10 bg-white p-4 shadow-sm">
-          <div className="text-sm text-black/60">
+        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+          <div className="text-sm text-white/60">
             {view === "weekly" && `Current Week: ${getWeekKey()}`}
             {view === "monthly" && `Current Month: ${getMonthKey()}`}
             {view === "all-time" &&
@@ -263,8 +262,8 @@ export default function LeaderboardPage() {
         </div>
 
         {/* Leaderboard */}
-        <div className="rounded-xl border border-black/10 bg-white p-4 sm:p-6 shadow-sm">
-          <div className="grid grid-cols-12 text-xs font-medium uppercase text-black/60 mb-4">
+        <div className="rounded-xl border border-white/10 bg-white/5 p-4 sm:p-6">
+          <div className="grid grid-cols-12 text-xs font-medium uppercase text-white/60 mb-4">
             <div className="col-span-1">Rank</div>
             <div className="col-span-3">User</div>
             <div className="col-span-2 text-center">{getScoreLabel()}</div>
@@ -273,13 +272,13 @@ export default function LeaderboardPage() {
             <div className="col-span-3 text-center">NFT Achievements</div>
           </div>
 
-          <div className="divide-y">
+          <div className="divide-y divide-white/10">
             {leaderboardData.map((item, idx) => (
               <div
                 key={item.user + idx}
                 className={`grid grid-cols-12 py-3 text-sm ${
                   pubkey && item.user === pubkey
-                    ? "bg-yellow-50 border-l-4 border-yellow-400 pl-2"
+                    ? "bg-yellow-500/10 border-l-4 border-yellow-400 pl-2"
                     : ""
                 }`}
               >
@@ -292,7 +291,7 @@ export default function LeaderboardPage() {
                 <div className="col-span-3 font-mono text-xs">
                   {item.user.slice(0, 8)}...{item.user.slice(-6)}
                   {pubkey && item.user === pubkey && (
-                    <span className="ml-2 text-yellow-600 font-normal">
+                    <span className="ml-2 text-yellow-400 font-normal">
                       (You)
                     </span>
                   )}
@@ -302,10 +301,10 @@ export default function LeaderboardPage() {
                     ? (item.juzTokens / 1_000_000).toFixed(3)
                     : item.score}
                 </div>
-                <div className="col-span-2 text-center text-green-600 font-medium">
+                <div className="col-span-2 text-center text-green-400 font-medium">
                   {(item.juzTokens / 1_000_000).toFixed(3)}
                 </div>
-                <div className="col-span-1 text-center text-black/70">
+                <div className="col-span-1 text-center text-white/70">
                   {item.pages}
                 </div>
                 <div className="col-span-3 text-center text-xs">
@@ -314,97 +313,94 @@ export default function LeaderboardPage() {
                       {item.achievements.slice(0, 2).map((achievement, i) => (
                         <span
                           key={i}
-                          className="bg-black/5 px-1.5 py-0.5 rounded text-xs"
+                          className="bg-white/10 px-1.5 py-0.5 rounded text-xs"
                         >
                           {achievement}
                         </span>
                       ))}
                       {item.achievements.length > 2 && (
-                        <span className="text-black/50">
+                        <span className="text-white/50">
                           +{item.achievements.length - 2}
                         </span>
                       )}
                     </div>
                   ) : (
-                    <span className="text-black/40">-</span>
+                    <span className="text-white/40">-</span>
                   )}
                 </div>
               </div>
             ))}
 
             {leaderboardData.length === 0 && (
-              <div className="py-8 text-center text-black/60">
+              <div className="py-8 text-center text-white/60">
                 No data for this period.
               </div>
             )}
           </div>
         </div>
 
-        {/* JUZ Token Info */}
-        <div className="rounded-xl border border-black/10 bg-gradient-to-r from-green-50 to-blue-50 p-4 sm:p-6 shadow-sm">
-          <h2 className="text-lg font-semibold mb-3">🪙 JUZ Token System</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
-            <div className="bg-white/50 rounded-lg p-3">
-              <div className="font-medium">Per Page Reward</div>
-              <div className="text-lg font-semibold">
-                {(Math.floor(1_000_000 / 20) / 1_000_000).toFixed(6)} JUZ
-              </div>
-              <div className="text-xs text-black/60">1/20 token per page</div>
-            </div>
-            <div className="bg-white/50 rounded-lg p-3">
-              <div className="font-medium">Full Juz Reward</div>
-              <div className="text-lg font-semibold">1.000 JUZ</div>
-              <div className="text-xs text-black/60">
-                Complete 20 pages = 1 full token
+        {/* Motivation Section */}
+        <div className="rounded-xl border border-white/10 bg-white/5 p-4 sm:p-6">
+          <h2 className="text-lg font-semibold mb-3">
+            🌱 Motivation & Reflection
+          </h2>
+          <div className="space-y-4 text-sm">
+            <div className="bg-white/10 rounded-lg p-4">
+              <div className="font-medium mb-1">Faith in Action</div>
+              <div className="text-white/80">
+                Our hands are the tools Allah has given us to make a positive
+                impact. Every small action done for the sake of faith multiplies
+                in reward, both in this world and the next.
               </div>
             </div>
-            <div className="bg-white/50 rounded-lg p-3">
-              <div className="font-medium">Special Bonuses</div>
-              <div className="text-lg font-semibold">+0.5 - 1.0 JUZ</div>
-              <div className="text-xs text-black/60">
-                Al-Fatihah & completion bonuses
+            <div className="bg-white/10 rounded-lg p-4">
+              <div className="font-medium mb-1">The Gift of Guidance</div>
+              <div className="text-white/80">
+                The Quran is not just a book to be read—it's a light to live by.
+                Embracing its teachings and striving to embody them transforms
+                our lives and those around us.
+              </div>
+            </div>
+            <div className="bg-white/10 rounded-lg p-4">
+              <div className="font-medium mb-1">Continuous Growth</div>
+              <div className="text-white/80">
+                Every day is a new opportunity to learn, give, and grow. Let’s
+                be motivated to take even one step closer to our Creator,
+                knowing that every sincere effort is valued.
               </div>
             </div>
           </div>
         </div>
 
-        {/* NFT Rewards Info */}
-        <div className="rounded-xl border border-black/10 bg-gradient-to-r from-purple-50 to-blue-50 p-4 sm:p-6 shadow-sm">
+        {/* Call to Action Section */}
+        <div className="rounded-xl border border-white/10 bg-white/5 p-4 sm:p-6">
           <h2 className="text-lg font-semibold mb-3">
-            🎨 NFT Achievement Milestones
+            🤲 Make Your Faith Meaningful
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
-            <div className="bg-white/50 rounded-lg p-3">
-              <div className="font-medium">🥉 First Week (7 pages)</div>
-              <div className="text-xs text-black/60">
-                Bronze Achievement NFT
+          <div className="space-y-4 text-sm">
+            <div className="bg-white/10 rounded-lg p-4">
+              <div className="font-medium mb-1">Start Today</div>
+              <div className="text-white/80">
+                Whether it’s reading a single verse, helping someone in need, or
+                reflecting upon your blessings, the journey to betterment begins
+                now—right in your hands.
               </div>
             </div>
-            <div className="bg-white/50 rounded-lg p-3">
-              <div className="font-medium">🥈 Monthly Reader (30 pages)</div>
-              <div className="text-xs text-black/60">
-                Silver Achievement NFT
+            <div className="bg-white/10 rounded-lg p-4">
+              <div className="font-medium mb-1">Empower Your Community</div>
+              <div className="text-white/80">
+                Share knowledge, inspire others, and build a legacy of goodness.
+                Together, we can uplift hearts and strengthen our connection to
+                faith.
               </div>
             </div>
-            <div className="bg-white/50 rounded-lg p-3">
-              <div className="font-medium">🥇 Century Club (100 pages)</div>
-              <div className="text-xs text-black/60">Gold Achievement NFT</div>
-            </div>
-            <div className="bg-white/50 rounded-lg p-3">
-              <div className="font-medium">💎 Diamond Reader (300 pages)</div>
-              <div className="text-xs text-black/60">
-                Diamond Achievement NFT
+            <div className="bg-white/10 rounded-lg p-4">
+              <div className="font-medium mb-1">Remember Your Purpose</div>
+              <div className="text-white/80">
+                Our ultimate goal is to seek the pleasure of Allah. Make each
+                action intentional and let your hands be a means of positive
+                change, compassion, and remembrance.
               </div>
-            </div>
-            <div className="bg-white/50 rounded-lg p-3">
-              <div className="font-medium">👑 Quran Complete (604 pages)</div>
-              <div className="text-xs text-black/60">
-                Legendary Completion NFT
-              </div>
-            </div>
-            <div className="bg-white/50 rounded-lg p-3">
-              <div className="font-medium">🏆 Weekly/Monthly Top 3</div>
-              <div className="text-xs text-black/60">Special Ranking NFTs</div>
             </div>
           </div>
         </div>

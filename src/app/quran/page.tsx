@@ -183,29 +183,39 @@ export default function QuranIndexPage() {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <span className="text-green-400">✓</span>
-                <span>Minimum 1 minute per page to earn rewards</span>
+                <span>
+                  Begin with sincere intention (niyyah) for Allah’s sake
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-green-400">✓</span>
-                <span>Pages 1-2 only need 30 seconds</span>
+                <span>
+                  Start by seeking refuge (isti'adhah) and saying Bismillah
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-green-400">✓</span>
-                <span>Earn 1/20 JUZ token per completed page</span>
+                <span>
+                  Read with correct pronunciation (tajweed) and take your time
+                </span>
               </div>
             </div>
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <span className="text-blue-400">🎁</span>
-                <span>Bonus 0.1 JUZ for Al-Fatihah (page 1)</span>
+                <span className="text-blue-400">📖</span>
+                <span>Reflect on the meanings and ponder the message</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-purple-400">🏆</span>
-                <span>NFT achievements for certain milestones</span>
+                <span className="text-purple-400">🕰️</span>
+                <span>
+                  Set a regular routine, even if you read a small portion daily
+                </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-orange-400">🔥</span>
-                <span>No time limit - read at your own pace!</span>
+                <span className="text-orange-400">🧼</span>
+                <span>
+                  Make sure you are in a state of physical cleanliness (wudu)
+                </span>
               </div>
             </div>
           </div>

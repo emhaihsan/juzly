@@ -167,40 +167,40 @@ export default function RewardsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-black">
+    <div className="min-h-screen bg-black text-white">
       <main className="mx-auto max-w-5xl px-4 py-6 sm:py-10 space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl sm:text-3xl font-semibold">My Rewards</h1>
-            <p className="text-sm text-black/60">
+            <p className="text-sm text-white/60">
               JUZ token rewards from reading the Holy Quran. Earn JUZ tokens for
               every page you read.
             </p>
           </div>
           <Link
             href="/leaderboard"
-            className="inline-flex items-center rounded-md border border-black px-3 py-1.5 text-sm hover:bg-black hover:text-white transition-colors"
+            className="inline-flex items-center rounded-md border border-white/30 px-3 py-1.5 text-sm hover:bg-white hover:text-black transition-colors"
           >
             Leaderboard
           </Link>
         </div>
 
         {/* Wallet Status */}
-        <section className="rounded-xl border border-black/10 bg-white p-4 sm:p-6 shadow-sm space-y-2">
+        <section className="rounded-xl border border-white/10 bg-white/5 p-4 sm:p-6 space-y-2">
           <div className="text-sm">
             <span className="opacity-60">Wallet:</span>{" "}
             {isConnected && pubkey ? (
-              <span className="font-mono text-green-600">
+              <span className="font-mono text-green-400">
                 {pubkey.slice(0, 6)}...{pubkey.slice(-6)} ✅
               </span>
             ) : (
-              <span className="italic text-red-600">
+              <span className="italic text-red-400">
                 Not connected (use Connect Wallet button above)
               </span>
             )}
           </div>
           {isConnected && (
-            <div className="text-xs text-black/50">
+            <div className="text-xs text-white/50">
               Connected to Solana Devnet • JUZ Token Mint:
               5sNd52...zkqwU5xKnwZVLRDEoV2bkdQWtzmB
             </div>
@@ -210,29 +210,29 @@ export default function RewardsPage() {
         {/* Token Balances */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Local Balance (Pending) */}
-          <section className="rounded-xl border border-orange-200 bg-orange-50 p-4 sm:p-6 shadow-sm space-y-3">
+          <section className="rounded-xl border border-orange-500/30 bg-orange-500/10 p-4 sm:p-6 space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">Pending Rewards</h2>
-              <div className="text-orange-600 text-sm">📋 Local</div>
+              <div className="text-orange-400 text-sm">📋 Local</div>
             </div>
             <div className="text-3xl font-semibold">
               {(bal / 1_000_000).toFixed(2)} JUZ
             </div>
-            <div className="text-xs text-black/60">
+            <div className="text-xs text-white/60">
               Reading rewards waiting to be minted to blockchain
             </div>
             <div className="flex gap-2">
               <button
                 onClick={refresh}
                 disabled={!isConnected || !pubkey}
-                className="rounded-md border border-orange-600 text-orange-600 px-3 py-1.5 text-sm hover:bg-orange-600 hover:text-white transition-colors disabled:opacity-50"
+                className="rounded-md border border-orange-400 text-orange-400 px-3 py-1.5 text-sm hover:bg-orange-400 hover:text-black transition-colors disabled:opacity-50"
               >
                 Refresh
               </button>
               <button
                 onClick={handleMintTokens}
                 disabled={!isConnected || !pubkey || bal <= 0 || minting}
-                className="rounded-md bg-orange-600 text-white px-3 py-1.5 text-sm hover:bg-orange-700 transition-colors disabled:opacity-50"
+                className="rounded-md bg-orange-400 text-black px-3 py-1.5 text-sm hover:bg-orange-300 transition-colors disabled:opacity-50"
               >
                 {minting ? "Minting..." : "Mint to Blockchain"}
               </button>
@@ -240,30 +240,30 @@ export default function RewardsPage() {
           </section>
 
           {/* Real On-chain Balance */}
-          <section className="rounded-xl border border-green-200 bg-green-50 p-4 sm:p-6 shadow-sm space-y-3">
+          <section className="rounded-xl border border-green-500/30 bg-green-500/10 p-4 sm:p-6 space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">JUZ Token Balance</h2>
-              <div className="text-green-600 text-sm">⛓️ Blockchain</div>
+              <div className="text-green-400 text-sm">⛓️ Blockchain</div>
             </div>
             <div className="text-3xl font-semibold">
               {balanceLoading
                 ? "Loading..."
                 : `${onChainBalance.toFixed(2)} JUZ`}
             </div>
-            <div className="text-xs text-black/60">
+            <div className="text-xs text-white/60">
               Real JUZ tokens in your Solana wallet (Devnet)
             </div>
             <div className="flex gap-2">
               <button
                 onClick={refreshOnChainBalance}
                 disabled={!isConnected || !pubkey || balanceLoading}
-                className="rounded-md border border-green-600 text-green-600 px-3 py-1.5 text-sm hover:bg-green-600 hover:text-white transition-colors disabled:opacity-50"
+                className="rounded-md border border-green-400 text-green-400 px-3 py-1.5 text-sm hover:bg-green-400 hover:text-black transition-colors disabled:opacity-50"
               >
                 {balanceLoading ? "Loading..." : "Refresh"}
               </button>
               <Link
                 href="/marketplace"
-                className="inline-block rounded-md bg-green-600 text-white px-3 py-1.5 text-sm hover:bg-green-700 transition-colors"
+                className="inline-block rounded-md bg-green-400 text-black px-3 py-1.5 text-sm hover:bg-green-300 transition-colors"
               >
                 Use in Marketplace
               </Link>
@@ -272,31 +272,31 @@ export default function RewardsPage() {
         </div>
 
         {/* Progress Tracker */}
-        <section className="rounded-xl border border-black/10 bg-gradient-to-r from-blue-50 to-purple-50 p-4 text-sm">
+        <section className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm">
           <h2 className="text-lg font-semibold mb-3">📊 Reading Progress</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-            <div className="bg-white/50 rounded-lg p-3">
+            <div className="bg-white/10 rounded-lg p-3">
               <div className="font-medium">Pending Rewards</div>
               <div className="text-lg font-semibold">
                 {(bal / 1_000_000).toFixed(2)} JUZ
               </div>
-              <div className="text-xs text-black/60">
+              <div className="text-xs text-white/60">
                 Earned from reading sessions
               </div>
             </div>
-            <div className="bg-white/50 rounded-lg p-3">
+            <div className="bg-white/10 rounded-lg p-3">
               <div className="font-medium">Blockchain Balance</div>
               <div className="text-lg font-semibold">
                 {onChainBalance.toFixed(2)} JUZ
               </div>
-              <div className="text-xs text-black/60">Minted to your wallet</div>
+              <div className="text-xs text-white/60">Minted to your wallet</div>
             </div>
-            <div className="bg-white/50 rounded-lg p-3">
+            <div className="bg-white/10 rounded-lg p-3">
               <div className="font-medium">Total Earned</div>
               <div className="text-lg font-semibold">
                 {(bal / 1_000_000 + onChainBalance).toFixed(2)} JUZ
               </div>
-              <div className="text-xs text-black/60">
+              <div className="text-xs text-white/60">
                 Pending + Blockchain combined
               </div>
             </div>
@@ -304,22 +304,22 @@ export default function RewardsPage() {
         </section>
 
         {/* Minting History */}
-        <section className="rounded-xl border border-black/10 bg-white p-4 sm:p-6 shadow-sm">
+        <section className="rounded-xl border border-white/10 bg-white/5 p-4 sm:p-6">
           <h2 className="text-lg font-semibold">Minting History</h2>
           <div className="mt-3 space-y-2">
             {mintingHistory.length === 0 && (
-              <div className="text-sm text-black/60">
+              <div className="text-sm text-white/60">
                 No minting activity yet. Mint your rewards to see them here!
               </div>
             )}
             {mintingHistory.map((h, idx) => (
               <div
                 key={idx}
-                className="flex items-center justify-between rounded-md border border-black/10 p-3 text-sm"
+                className="flex items-center justify-between rounded-md border border-white/10 bg-white/5 p-3 text-sm"
               >
                 <div>
                   <div className="font-medium">+{h.amount} JUZ</div>
-                  <div className="text-xs text-black/60">
+                  <div className="text-xs text-white/60">
                     Transaction: {h.tx.slice(0, 8)}... •{" "}
                     {new Date(h.ts).toLocaleString()}
                   </div>
@@ -328,20 +328,6 @@ export default function RewardsPage() {
               </div>
             ))}
           </div>
-        </section>
-
-        {/* Development Note */}
-        <section className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm">
-          <h3 className="font-semibold text-blue-800 mb-2">
-            🔧 Development Note
-          </h3>
-          <p className="text-blue-700">
-            <strong>Real Blockchain Integration:</strong> This rewards page now
-            fetches your actual JUZ token balance from Solana blockchain. The
-            "Mint to Blockchain" button currently simulates the minting process
-            since real token minting requires a secure backend service with mint
-            authority access.
-          </p>
         </section>
       </main>
     </div>

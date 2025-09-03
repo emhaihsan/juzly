@@ -27,10 +27,15 @@ export default function MarketplacePage() {
           setJuzBalance(balance);
         } catch (error) {
           console.error("Error fetching JUZ balance:", error);
-          setJuzBalance(0);
+          // Fallback to localStorage balance if blockchain fails
+          const localBalances = localStorage.getItem("r2e_balances");
+          const balanceMap = localBalances ? JSON.parse(localBalances) : {};
+          setJuzBalance(balanceMap[pubkey] || 0);
         } finally {
           setBalanceLoading(false);
         }
+      } else {
+        setJuzBalance(0);
       }
     };
 
@@ -73,7 +78,7 @@ export default function MarketplacePage() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-black">
+    <div className="min-h-screen bg-black text-white">
       <main className="mx-auto max-w-6xl px-4 py-6 sm:py-10 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -81,16 +86,16 @@ export default function MarketplacePage() {
             <h1 className="text-2xl sm:text-3xl font-semibold">
               JUZ Marketplace 🛍️
             </h1>
-            <p className="text-sm text-black/60">
+            <p className="text-sm text-white/60">
               Redeem your reading rewards for Islamic merchandise
             </p>
           </div>
           <div className="text-right">
-            <div className="text-sm text-black/60">Your Balance</div>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-sm text-white/60">Your Balance</div>
+            <div className="text-2xl font-bold text-green-400">
               {isConnected ? formatJuzAmount(juzBalance) : "0.00"} JUZ
             </div>
-            <div className="text-xs text-black/50">
+            <div className="text-xs text-white/50">
               {isConnected
                 ? `${pubkey?.slice(0, 4)}...${pubkey?.slice(-4)}`
                 : "Not connected"}
@@ -100,14 +105,14 @@ export default function MarketplacePage() {
 
         {/* Connection Notice */}
         {!isConnected && (
-          <div className="rounded-xl border border-orange-200 bg-orange-50 p-4">
+          <div className="rounded-xl border border-orange-500/30 bg-orange-500/10 p-4">
             <div className="flex items-center gap-2">
-              <span className="text-orange-600">⚠️</span>
+              <span className="text-orange-400">⚠️</span>
               <div>
-                <div className="font-medium text-orange-800">
+                <div className="font-medium text-orange-400">
                   Wallet Not Connected
                 </div>
-                <div className="text-sm text-orange-700">
+                <div className="text-sm text-orange-300">
                   Connect your wallet to view your JUZ balance and redeem items.
                 </div>
               </div>
@@ -116,45 +121,20 @@ export default function MarketplacePage() {
         )}
 
         {/* Category Filter */}
-        <div className="flex gap-2 p-1 bg-black/5 rounded-lg w-fit">
+        <div className="flex gap-2 p-1 bg-white/5 rounded-lg w-fit">
           {categories.map((category) => (
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
               className={`px-4 py-2 text-sm rounded-md transition-colors capitalize ${
                 selectedCategory === category
-                  ? "bg-black text-white"
-                  : "hover:bg-black/10"
+                  ? "bg-white text-black"
+                  : "hover:bg-white/10"
               }`}
             >
               {category}
             </button>
           ))}
-        </div>
-
-        {/* How It Works */}
-        <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 sm:p-6">
-          <h2 className="text-lg font-semibold text-blue-900 mb-3">
-            💡 How JUZ Tokens Work
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-            <div className="bg-white/50 rounded-lg p-3">
-              <div className="font-medium text-blue-800">📖 Read Quran</div>
-              <div className="text-blue-700">Earn 1 JUZ per minute</div>
-            </div>
-            <div className="bg-white/50 rounded-lg p-3">
-              <div className="font-medium text-blue-800">✅ Complete Pages</div>
-              <div className="text-blue-700">Get 0.5 JUZ bonus</div>
-            </div>
-            <div className="bg-white/50 rounded-lg p-3">
-              <div className="font-medium text-blue-800">🔥 Daily Streaks</div>
-              <div className="text-blue-700">Up to 2x multiplier</div>
-            </div>
-            <div className="bg-white/50 rounded-lg p-3">
-              <div className="font-medium text-blue-800">🛍️ Redeem Items</div>
-              <div className="text-blue-700">Exchange for merchandise</div>
-            </div>
-          </div>
         </div>
 
         {/* Merchandise Grid */}
@@ -166,10 +146,10 @@ export default function MarketplacePage() {
             return (
               <div
                 key={item.id}
-                className="rounded-xl border border-black/10 bg-white p-4 shadow-sm"
+                className="rounded-xl border border-white/10 bg-white/5 p-4"
               >
                 {/* Item Image Placeholder */}
-                <div className="aspect-square rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 mb-4 flex items-center justify-center">
+                <div className="aspect-square rounded-lg bg-white/10 mb-4 flex items-center justify-center">
                   <div className="text-4xl">
                     {item.category === "digital" && "🎨"}
                     {item.category === "physical" && "📦"}
@@ -186,17 +166,17 @@ export default function MarketplacePage() {
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${
                         item.category === "digital"
-                          ? "bg-purple-100 text-purple-800"
+                          ? "bg-purple-500/20 text-purple-300"
                           : item.category === "physical"
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-green-100 text-green-800"
+                          ? "bg-blue-500/20 text-blue-300"
+                          : "bg-green-500/20 text-green-300"
                       }`}
                     >
                       {item.category}
                     </span>
                   </div>
 
-                  <p className="text-sm text-black/70 line-clamp-2">
+                  <p className="text-sm text-white/70 line-clamp-2">
                     {item.description}
                   </p>
 
@@ -204,12 +184,12 @@ export default function MarketplacePage() {
                     <div>
                       <div className="text-lg font-bold">{priceInJuz} JUZ</div>
                       {item.stock < 100 && (
-                        <div className="text-xs text-orange-600">
+                        <div className="text-xs text-orange-400">
                           Only {item.stock} left
                         </div>
                       )}
                       {item.shipping && (
-                        <div className="text-xs text-black/50">+ shipping</div>
+                        <div className="text-xs text-white/50">+ shipping</div>
                       )}
                     </div>
 
@@ -223,10 +203,10 @@ export default function MarketplacePage() {
                       }
                       className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                         !isConnected || !affordable || item.stock === 0
-                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                          ? "bg-white/10 text-white/40 cursor-not-allowed"
                           : redeeming === item.id
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-black text-white hover:bg-black/80"
+                          ? "bg-yellow-500/20 text-yellow-300"
+                          : "bg-white text-black hover:bg-white/90"
                       }`}
                     >
                       {redeeming === item.id
@@ -251,33 +231,11 @@ export default function MarketplacePage() {
           <div className="text-center py-12">
             <div className="text-4xl mb-4">🔍</div>
             <div className="text-lg font-medium">No items found</div>
-            <div className="text-sm text-black/60">
+            <div className="text-sm text-white/60">
               Try selecting a different category
             </div>
           </div>
         )}
-
-        {/* Footer Links */}
-        <div className="flex justify-center gap-4 pt-8">
-          <Link
-            href="/rewards"
-            className="inline-flex items-center rounded-md border border-black px-4 py-2 text-sm hover:bg-black hover:text-white transition-colors"
-          >
-            View My Rewards
-          </Link>
-          <Link
-            href="/leaderboard"
-            className="inline-flex items-center rounded-md border border-black px-4 py-2 text-sm hover:bg-black hover:text-white transition-colors"
-          >
-            Leaderboard
-          </Link>
-          <Link
-            href="/quran"
-            className="inline-flex items-center rounded-md border border-black px-4 py-2 text-sm hover:bg-black hover:text-white transition-colors"
-          >
-            Start Reading
-          </Link>
-        </div>
       </main>
     </div>
   );

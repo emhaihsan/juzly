@@ -257,27 +257,30 @@ export default function ReadTimer({ page }: { page: number }) {
   const progressToComplete = Math.max(0, minReadingTime - seconds);
 
   return (
-    <div ref={containerRef} className="rounded-md border border-black/10 p-3">
+    <div
+      ref={containerRef}
+      className="rounded-md border border-white/10 bg-white/5 p-3"
+    >
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-sm font-medium">
+          <div className="text-sm font-medium text-white">
             Read to Earn {pageCompleted && "✅"}
           </div>
-          <div className="text-xs text-black/60">
+          <div className="text-xs text-white/60">
             Page {page} • Min: {minReadingTime}s • Reward: 0.05 JUZ
           </div>
         </div>
-        <div className="text-sm font-mono">
+        <div className="text-sm font-mono text-white">
           {minutes.toString().padStart(2, "0")}:
           {secondsPart.toString().padStart(2, "0")}
         </div>
       </div>
 
       {/* Progress bar for page completion */}
-      <div className="mt-2 h-2 w-full rounded bg-black/10 overflow-hidden">
+      <div className="mt-2 h-2 w-full rounded bg-white/10 overflow-hidden">
         <div
           className={`h-full transition-colors ${
-            pageCompleted ? "bg-green-500" : "bg-black"
+            pageCompleted ? "bg-green-500" : "bg-white"
           }`}
           style={{
             width: `${Math.min(100, (seconds / minReadingTime) * 100)}%`,
@@ -285,7 +288,7 @@ export default function ReadTimer({ page }: { page: number }) {
         />
       </div>
 
-      <div className="mt-2 flex items-center justify-between text-xs text-black/60">
+      <div className="mt-2 flex items-center justify-between text-xs text-white/60">
         <div>
           {!pageCompleted && progressToComplete > 0
             ? `${progressToComplete}s remaining to complete`
@@ -304,7 +307,7 @@ export default function ReadTimer({ page }: { page: number }) {
         <button
           onClick={doClaim}
           disabled={claiming || !isConnected || !pubkey || claimed}
-          className="rounded-md border border-black px-3 py-1.5 text-sm hover:bg-black hover:text-white disabled:opacity-50 transition-colors"
+          className="rounded-md border border-white/30 px-3 py-1.5 text-sm hover:bg-white hover:text-black disabled:opacity-50 transition-colors"
         >
           {claiming
             ? "Claiming..."
@@ -316,9 +319,9 @@ export default function ReadTimer({ page }: { page: number }) {
         </button>
         <Link
           href="/rewards"
-          className="rounded-md border border-blue-600 text-blue-600 px-3 py-1.5 text-sm hover:bg-blue-600 hover:text-white transition-colors"
+          className="rounded-md border border-white/30 text-white px-3 py-1.5 text-sm hover:bg-white hover:text-black transition-colors"
         >
-          My Rewards ({(getBalance(pubkey || "") / 1_000_000).toFixed(1)} JUZ)
+          Go to Rewards Page
         </Link>
       </div>
     </div>

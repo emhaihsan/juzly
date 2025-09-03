@@ -23,8 +23,7 @@ export default function Home() {
                 <span className="text-white/60">.</span>GROW
               </h1>
               <p className="text-xl md:text-2xl text-white/80 mb-8 max-w-3xl mx-auto leading-relaxed">
-                Revolutionary blockchain platform connecting Islamic
-                spirituality with Web3 rewards
+                Not just your regular Quran app
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <Link
@@ -33,12 +32,6 @@ export default function Home() {
                 >
                   <span className="relative z-10">Start Reading</span>
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                </Link>
-                <Link
-                  href="/donation"
-                  className="border border-white/30 text-white px-8 py-4 text-lg font-semibold hover:border-white hover:bg-white/5 transition-all duration-300"
-                >
-                  Make Donation
                 </Link>
               </div>
             </div>
@@ -185,8 +178,6 @@ export default function Home() {
           </div>
         </section>
       </main>
-
-      <Footer />
     </div>
   );
 }
