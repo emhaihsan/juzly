@@ -1,0 +1,327 @@
+"use client";
+
+import { Keypair, PublicKey } from "@solana/web3.js";
+import { createQR, encodeURL } from "@solana/pay";
+import BigNumber from "bignumber.js";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { useSolanaWallet } from "@web3auth/modal/react/solana";
+import { useWeb3AuthConnect } from "@web3auth/modal/react";
+import Link from "next/link";
+
+// Predefined donation amounts in SOL
+const DONATION_PRESETS = [
+  { amount: 0.01, label: "0.01 SOL", description: "Small Sadaqah" },
+  { amount: 0.05, label: "0.05 SOL", description: "Regular Donation" },
+  { amount: 0.1, label: "0.1 SOL", description: "Generous Gift" },
+  { amount: 0.25, label: "0.25 SOL", description: "Major Contribution" },
+];
+
+// Islamic charity organizations (example addresses - replace with real ones)
+const CHARITY_ORGANIZATIONS = [
+  {
+    name: "Muslim Blockchain Society",
+    address: "9q3335MQfBQuCkkUBdeXgrsXkbVTjvLxBAeyq11JPNdK",
+    description:
+      "Empowering the global Muslim community through blockchain technology",
+  },
+  {
+    name: "Blockchain Education for Muslims",
+    address: "3JDJbu8KH58ViKV8BfFtH3xwXgtdvoAwgUwfGbfz8j68",
+    description:
+      "Promoting blockchain literacy and opportunities for Muslims worldwide",
+  },
+  {
+    name: "Islamic Blockchain Relief",
+    address: "Dd1RRKveoFxZeGXfmjteDvA4MxD5oibpqF3qTfg8DZTC",
+    description:
+      "Supporting humanitarian initiatives powered by blockchain for Muslim societies",
+  },
+];
+
+export default function DonationPage() {
+  const { isConnected } = useWeb3AuthConnect();
+  const { accounts } = useSolanaWallet();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [customAmount, setCustomAmount] = useState<string>("");
+  const [selectedCharity, setSelectedCharity] = useState(0);
+  const [showModal, setShowModal] = useState(false);
+  const [qrUrl, setQrUrl] = useState<string>("");
+  const qrRef = useRef<HTMLDivElement>(null);
+
+  const generateQrCode = (amount: number) => {
+    try {
+      if (!isConnected || !accounts?.[0]) {
+        setError("Please connect your wallet first");
+        return;
+      }
+
+      if (amount <= 0) {
+        setError("Please enter a valid donation amount");
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+
+      // Set donation parameters
+      const recipient = new PublicKey(
+        CHARITY_ORGANIZATIONS[selectedCharity].address
+      );
+      const donationAmount = new BigNumber(amount);
+      const reference = new Keypair().publicKey;
+
+      // Islamic donation labels
+      const label = `Sadaqah via Juzly - ${CHARITY_ORGANIZATIONS[selectedCharity].name}`;
+      const message = `Barakallahu feeki for your generous donation! May Allah accept this Sadaqah.`;
+      const memo = `Donation-${CHARITY_ORGANIZATIONS[
+        selectedCharity
+      ].name.replace(/\s+/g, "-")}-${Date.now()}`;
+
+      // Create Solana Pay URL
+      const url = encodeURL({
+        recipient,
+        amount: donationAmount,
+        reference,
+        label,
+        message,
+        memo,
+      });
+
+      setQrUrl(url.toString());
+      setShowModal(true);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to generate QR code"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Generate QR code when modal opens and URL is available
+  useEffect(() => {
+    if (showModal && qrUrl && qrRef.current) {
+      qrRef.current.innerHTML = "";
+      try {
+        const qr = createQR(qrUrl, 300, "white");
+        qr.append(qrRef.current);
+      } catch (err) {
+        setError("Failed to create QR code");
+      }
+    }
+  }, [showModal, qrUrl]);
+
+  const closeModal = () => {
+    setShowModal(false);
+    setQrUrl("");
+    setError(null);
+  };
+
+  const handleCustomDonation = () => {
+    const amount = parseFloat(customAmount);
+    if (isNaN(amount)) {
+      setError("Please enter a valid number");
+      return;
+    }
+    generateQrCode(amount);
+  };
+
+  return (
+    <div className="min-h-screen bg-white text-black">
+      <div className="mx-auto w-full max-w-4xl px-4 py-10">
+        {/* Header */}
+        <div className="text-center mb-10">
+          <h1 className="text-3xl font-bold mb-3">💝 Make a Donation</h1>
+          <p className="text-lg text-black/70 mb-2">
+            Support Islamic causes through blockchain technology
+          </p>
+          <p className="text-sm text-black/60">
+            "The believer's shade on the Day of Resurrection will be their
+            charity" - Prophet Muhammad ﷺ
+          </p>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Left Column: Charity Selection */}
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xl font-semibold mb-4">
+                📋 Select Organization
+              </h2>
+              <div className="space-y-3">
+                {CHARITY_ORGANIZATIONS.map((org, index) => (
+                  <div
+                    key={index}
+                    className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                      selectedCharity === index
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                    onClick={() => setSelectedCharity(index)}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="font-medium">{org.name}</h3>
+                        <p className="text-sm text-black/60 mt-1">
+                          {org.description}
+                        </p>
+                        <p className="text-xs text-black/40 mt-1 font-mono">
+                          {org.address.slice(0, 8)}...{org.address.slice(-8)}
+                        </p>
+                      </div>
+                      {selectedCharity === index && (
+                        <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Islamic Quote */}
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-sm text-green-800 italic">
+                "Whoever relieves a Muslim of a burden from the burdens of the
+                world, Allah will relieve him of a burden from the burdens on
+                the Day of Judgment."
+              </p>
+              <p className="text-xs text-green-600 mt-1">
+                - Hadith Sahih Muslim
+              </p>
+            </div>
+          </div>
+
+          {/* Right Column: Donation Amount */}
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xl font-semibold mb-4">💰 Choose Amount</h2>
+
+              {/* Preset Amounts */}
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                {DONATION_PRESETS.map((preset, index) => (
+                  <button
+                    key={index}
+                    onClick={() => generateQrCode(preset.amount)}
+                    disabled={isLoading || !isConnected}
+                    className="p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors disabled:opacity-50 text-left"
+                  >
+                    <div className="font-semibold">{preset.label}</div>
+                    <div className="text-sm text-black/60">
+                      {preset.description}
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {/* Custom Amount */}
+              <div className="space-y-3">
+                <label className="block text-sm font-medium">
+                  Custom Amount (SOL)
+                </label>
+                <div className="flex gap-3">
+                  <input
+                    type="number"
+                    placeholder="0.00"
+                    value={customAmount}
+                    onChange={(e) => setCustomAmount(e.target.value)}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    step="0.01"
+                    min="0"
+                  />
+                  <button
+                    onClick={handleCustomDonation}
+                    disabled={isLoading || !isConnected || !customAmount}
+                    className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-colors"
+                  >
+                    {isLoading ? "Generating..." : "Donate"}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Connection Status */}
+            {!isConnected && (
+              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-sm text-yellow-800">
+                  Please connect your wallet to make donations
+                </p>
+                <Link
+                  href="/"
+                  className="text-sm text-blue-600 hover:underline mt-2 inline-block"
+                >
+                  Go to home page to connect wallet →
+                </Link>
+              </div>
+            )}
+
+            {/* Error Display */}
+            {error && (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-800">❌ {error}</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* QR Code Modal */}
+        {showModal &&
+          createPortal(
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-xl max-w-md w-full p-6">
+                <div className="text-center">
+                  <h3 className="text-xl font-semibold mb-2">
+                    📱 Scan to Donate
+                  </h3>
+                  <p className="text-sm text-black/60 mb-4">
+                    Scan this QR code with any Solana wallet
+                  </p>
+
+                  <div className="flex justify-center mb-4">
+                    <div
+                      ref={qrRef}
+                      className="border border-gray-200 rounded-lg p-4 bg-white"
+                    ></div>
+                  </div>
+
+                  <div className="text-sm text-black/60 mb-4">
+                    <p>
+                      Donating to:{" "}
+                      <strong>
+                        {CHARITY_ORGANIZATIONS[selectedCharity].name}
+                      </strong>
+                    </p>
+                  </div>
+
+                  {error && (
+                    <div className="text-sm text-red-600 mb-4">
+                      Error: {error}
+                    </div>
+                  )}
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={closeModal}
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Close
+                    </button>
+                    <button
+                      onClick={() => navigator.clipboard.writeText(qrUrl)}
+                      className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                    >
+                      Copy Link
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>,
+            document.body
+          )}
+      </div>
+    </div>
+  );
+}

@@ -32,6 +32,7 @@ export default function Navbar() {
   const navItems = [
     { href: "/", label: "Home", exact: true },
     { href: "/quran", label: "Read Quran" },
+    { href: "/donation", label: "Donate" },
     { href: "/marketplace", label: "Marketplace" },
     { href: "/leaderboard", label: "Leaderboard" },
     { href: "/rewards", label: "Rewards" },

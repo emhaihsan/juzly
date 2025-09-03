@@ -2,7 +2,6 @@
 
 import HeaderSection from "@/components/HeaderSection";
 import Footer from "@/components/Footer";
-import SolanaDemo from "@/components/SolanaDemo";
 import Link from "next/link";
 
 export default function Home() {
@@ -104,8 +103,65 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Solana Demo */}
-        <SolanaDemo />
+        {/* Solana Pay Donation Section */}
+        <section className="rounded-xl border border-black/10 bg-gradient-to-br from-emerald-50 to-teal-50 p-6 shadow-sm">
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                💝 Solana Pay Donations
+                <span className="text-xs bg-emerald-500 text-white px-2 py-1 rounded-full">
+                  NEW
+                </span>
+              </h2>
+              <p className="text-sm text-black/70 mt-1">
+                Make charitable donations using Solana Pay QR codes - seamless,
+                fast, and transparent
+              </p>
+            </div>
+            <div className="text-4xl">📱</div>
+          </div>
+
+          <div className="grid sm:grid-cols-3 gap-4 mb-6">
+            <div className="text-center p-3 rounded-lg bg-white/50">
+              <div className="text-2xl mb-1">⚡</div>
+              <div className="text-sm font-medium">Instant QR</div>
+              <div className="text-xs text-black/60">
+                Generate payment codes
+              </div>
+            </div>
+            <div className="text-center p-3 rounded-lg bg-white/50">
+              <div className="text-2xl mb-1">🔒</div>
+              <div className="text-sm font-medium">Secure</div>
+              <div className="text-xs text-black/60">Web3Auth protected</div>
+            </div>
+            <div className="text-center p-3 rounded-lg bg-white/50">
+              <div className="text-2xl mb-1">🌍</div>
+              <div className="text-sm font-medium">Global</div>
+              <div className="text-xs text-black/60">
+                Support Islamic causes
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-black/60">
+              <p className="mb-1">
+                <strong>Featured Organizations:</strong> Juzly Development,
+                Education for All, Humanitarian Aid
+              </p>
+              <p className="text-xs">
+                "The believer's shade on the Day of Resurrection will be their
+                charity" - Prophet Muhammad ﷺ
+              </p>
+            </div>
+            <Link
+              href="/donation"
+              className="ml-4 inline-flex items-center rounded-md bg-emerald-600 text-white px-6 py-3 text-sm font-medium hover:bg-emerald-700 transition-colors"
+            >
+              Make Donation →
+            </Link>
+          </div>
+        </section>
 
         {/* Overview Juzly */}
         <section className="rounded-xl border border-black/10 bg-white p-6 shadow-sm">
