@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useWeb3AuthConnect } from "@web3auth/modal/react";
 import { useSolanaWallet } from "@web3auth/modal/react/solana";
 import Link from "next/link";
@@ -100,7 +100,15 @@ function pushHistory(entry: {
   nftEligible?: boolean;
 }) {
   const raw = localStorage.getItem(LS_HISTORY);
-  const arr = raw ? (JSON.parse(raw) as any[]) : [];
+  const arr = raw
+    ? (JSON.parse(raw) as Array<{
+        ts: number;
+        minutes: number;
+        page: number;
+        note?: string;
+        nftEligible?: boolean;
+      }>)
+    : [];
   arr.unshift(entry);
   localStorage.setItem(LS_HISTORY, JSON.stringify(arr.slice(0, 100)));
 }

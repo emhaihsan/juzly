@@ -8,7 +8,7 @@ import {
 } from "@web3auth/modal/react";
 import { useWeb3AuthUser } from "@web3auth/modal/react";
 import { useSolanaWallet } from "@web3auth/modal/react/solana";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PublicKey, Connection, clusterApiUrl } from "@solana/web3.js";
 import { getUserJuzBalance } from "@/lib/juz-token";
 import { JUZ_DEPLOYMENT_CONFIG } from "@/lib/deployment-config";
@@ -25,8 +25,11 @@ export default function Navbar() {
 
   const pubkey = accounts?.[0];
 
-  // Use public devnet RPC to avoid 403 errors
-  const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
+  // Use public devnet RPC to avoid 403 errors - wrapped in useMemo to prevent recreation
+  const connection = useMemo(
+    () => new Connection(clusterApiUrl("devnet"), "confirmed"),
+    []
+  );
 
   // Navigation items
   const navItems = [

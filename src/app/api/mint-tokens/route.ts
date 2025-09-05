@@ -23,7 +23,7 @@ function loadMintAuthority(): Keypair {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userWallet, amount, activity } = await request.json();
+    const { userWallet, amount } = await request.json();
 
     // Validate inputs
     if (!userWallet || !amount || amount <= 0) {

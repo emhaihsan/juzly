@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useWeb3AuthConnect } from "@web3auth/modal/react";
 import { useSolanaWallet } from "@web3auth/modal/react/solana";
 import { MERCHANDISE_CATALOG } from "@/lib/merchandise";
@@ -13,14 +12,12 @@ export default function MarketplacePage() {
   const pubkey = accounts?.[0] || null;
 
   const [juzBalance, setJuzBalance] = useState(0);
-  const [balanceLoading, setBalanceLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [redeeming, setRedeeming] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchJuzBalance = async () => {
       if (pubkey && isConnected) {
-        setBalanceLoading(true);
         try {
           const publicKey = new PublicKey(pubkey);
           const balance = await getUserJuzBalance(publicKey);
@@ -31,8 +28,6 @@ export default function MarketplacePage() {
           const localBalances = localStorage.getItem("r2e_balances");
           const balanceMap = localBalances ? JSON.parse(localBalances) : {};
           setJuzBalance(balanceMap[pubkey] || 0);
-        } finally {
-          setBalanceLoading(false);
         }
       } else {
         setJuzBalance(0);

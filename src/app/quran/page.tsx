@@ -190,7 +190,7 @@ export default function QuranIndexPage() {
               <div className="flex items-center gap-2">
                 <span className="text-green-400">✓</span>
                 <span>
-                  Start by seeking refuge (isti'adhah) and saying Bismillah
+                  Start by seeking refuge (isti&apos;adhah) and saying Bismillah
                 </span>
               </div>
               <div className="flex items-center gap-2">

@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useWeb3AuthConnect, useWeb3Auth } from "@web3auth/modal/react";
+import { useCallback, useEffect, useState } from "react";
+import { useWeb3AuthConnect } from "@web3auth/modal/react";
 import { useSolanaWallet, useSignMessage } from "@web3auth/modal/react/solana";
 import {
   LAMPORTS_PER_SOL,
@@ -11,7 +11,6 @@ import {
 
 export default function SolanaDemo() {
   const { isConnected } = useWeb3AuthConnect();
-  const { web3Auth } = useWeb3Auth();
   const { accounts } = useSolanaWallet();
   const {
     data: signatureHash,
@@ -28,7 +27,7 @@ export default function SolanaDemo() {
   // Use public devnet RPC to avoid 403 errors
   const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 
-  const fetchBalance = async () => {
+  const fetchBalance = useCallback(async () => {
     if (!accounts?.[0]) {
       setError("No account available");
       return;
@@ -41,14 +40,15 @@ export default function SolanaDemo() {
       const lamports = await connection.getBalance(publicKey);
       setBalance(lamports / LAMPORTS_PER_SOL);
       setLastAction("Balance fetched successfully");
-    } catch (err: any) {
-      const errorMsg = err?.message || "Failed to fetch balance";
+    } catch (err: unknown) {
+      const errorMsg =
+        err instanceof Error ? err.message : "Failed to fetch balance";
       setError(errorMsg);
       setLastAction("Failed to fetch balance");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [accounts, connection]);
 
   const handleSignMessage = async () => {
     setError("");
@@ -76,7 +76,7 @@ export default function SolanaDemo() {
     } else if (isConnected && !accounts?.[0]) {
       setError("Connected but no account found");
     }
-  }, [isConnected, accounts]);
+  }, [isConnected, accounts, fetchBalance]);
 
   if (!isConnected) {
     return (

@@ -23,18 +23,15 @@ export default function NavigationButtons({
   prevPage,
   nextPage,
 }: Props) {
-  const { isConnected } = useWeb3AuthConnect();
   const { accounts } = useSolanaWallet();
   const pubkey = accounts?.[0] || null;
 
-  const [pendingRewards, setPendingRewards] = useState(0);
   const [canClaim, setCanClaim] = useState(false);
 
   // Check for pending rewards
   useEffect(() => {
     if (pubkey) {
       const balance = getBalance(pubkey);
-      setPendingRewards(balance);
       setCanClaim(balance > 0);
     }
   }, [pubkey, currentPage]);
@@ -44,7 +41,6 @@ export default function NavigationButtons({
     const interval = setInterval(() => {
       if (pubkey) {
         const balance = getBalance(pubkey);
-        setPendingRewards(balance);
         setCanClaim(balance > 0);
       }
     }, 1000);

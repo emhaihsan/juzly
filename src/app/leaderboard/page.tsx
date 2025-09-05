@@ -3,13 +3,11 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useWeb3AuthConnect } from "@web3auth/modal/react";
 import { useSolanaWallet } from "@web3auth/modal/react/solana";
-import { PublicKey } from "@solana/web3.js";
 
 const LS_BALANCES = "r2e_balances";
 const LS_PAGES_READ = "r2e_pages_read";
 const LS_WEEKLY_PROGRESS = "r2e_weekly_progress";
 const LS_MONTHLY_PROGRESS = "r2e_monthly_progress";
-const LS_HISTORY = "r2e_history";
 
 function getWeekKey() {
   const d = new Date();
@@ -65,7 +63,7 @@ function getNFTAchievements(pagesRead: number): string[] {
 
 export default function LeaderboardPage() {
   const { isConnected } = useWeb3AuthConnect();
-  const { accounts, connection } = useSolanaWallet();
+  const { accounts } = useSolanaWallet();
   const pubkey = accounts?.[0] || null;
 
   const [view, setView] = useState<"all-time" | "weekly" | "monthly">("weekly");
@@ -356,9 +354,9 @@ export default function LeaderboardPage() {
             <div className="bg-white/10 rounded-lg p-4">
               <div className="font-medium mb-1">The Gift of Guidance</div>
               <div className="text-white/80">
-                The Quran is not just a book to be read—it's a light to live by.
-                Embracing its teachings and striving to embody them transforms
-                our lives and those around us.
+                The Quran is not just a book to be read&mdash;it&apos;s a light
+                to live by. Embracing its teachings and striving to embody them
+                transforms our lives and those around us.
               </div>
             </div>
             <div className="bg-white/10 rounded-lg p-4">

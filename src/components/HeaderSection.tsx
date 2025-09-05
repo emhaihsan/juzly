@@ -88,9 +88,7 @@ export default function HeaderSection() {
         const c = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         setCoords(c);
       },
-      () => {
-        setCoords(null);
-      },
+      () => setCoords(null),
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 }
     );
   }, []);

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import ReadTimer from "@/components/ReadTimer";
 import NavigationButtons from "@/components/NavigationButtons";
 
@@ -42,8 +41,8 @@ export default async function MushafPage({ params }: Props) {
 
   try {
     data = await fetchUthmaniPage(pageNum);
-  } catch (e: any) {
-    error = e?.message || "Failed to fetch page";
+  } catch (e: unknown) {
+    error = e instanceof Error ? e.message : "Failed to fetch page";
   }
 
   if (!data) {

@@ -4,7 +4,7 @@ import {
   mintTo,
   TOKEN_PROGRAM_ID 
 } from '@solana/spl-token';
-import { getJuzMintAddress, getMintAuthorityAddress } from './deployment-config';
+import { getJuzMintAddress } from './deployment-config';
 
 // Connection to Solana devnet
 const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');

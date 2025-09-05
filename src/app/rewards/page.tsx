@@ -1,14 +1,12 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useWeb3AuthConnect } from "@web3auth/modal/react";
 import { useSolanaWallet } from "@web3auth/modal/react/solana";
 import { PublicKey } from "@solana/web3.js";
-import { getUserJuzBalance, formatJuzAmount } from "@/lib/juz-token";
-import { simulateReadingReward } from "@/lib/token-minting";
+import { getUserJuzBalance } from "@/lib/juz-token";
 
 const LS_BALANCES = "r2e_balances";
-const LS_HISTORY = "r2e_history";
 const LS_MINTING_HISTORY = "r2e_minting_history"; // Track actual blockchain mints
 
 function useBalance(pubkey: string | null) {
@@ -20,18 +18,22 @@ function useBalance(pubkey: string | null) {
   };
   useEffect(() => {
     refresh();
-  }, [pubkey]);
+  }, [pubkey, refresh]);
   return { bal, refresh };
 }
 
 // Track minting history
-function getMintingHistory(): any[] {
+function getMintingHistory(): Array<{
+  tx: string;
+  amount: number;
+  ts: number;
+}> {
   if (typeof window === "undefined") return [];
   const raw = localStorage.getItem(LS_MINTING_HISTORY);
   return raw ? JSON.parse(raw) : [];
 }
 
-function addMintingRecord(record: any) {
+function addMintingRecord(record: { tx: string; amount: number; ts: number }) {
   if (typeof window === "undefined") return;
   const history = getMintingHistory();
   history.unshift(record);
@@ -50,7 +52,9 @@ export default function RewardsPage() {
   const [onChainBalance, setOnChainBalance] = useState<number>(0);
   const [balanceLoading, setBalanceLoading] = useState(false);
   const [minting, setMinting] = useState(false);
-  const [mintingHistory, setMintingHistory] = useState<any[]>([]);
+  const [mintingHistory, setMintingHistory] = useState<
+    Array<{ tx: string; amount: number; ts: number }>
+  >([]);
 
   useEffect(() => {
     setMintingHistory(getMintingHistory());

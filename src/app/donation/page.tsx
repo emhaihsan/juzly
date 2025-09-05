@@ -91,9 +91,9 @@ export default function DonationPage() {
 
       setQrUrl(url.toString());
       setShowModal(true);
-    } catch (err) {
+    } catch (error) {
       setError(
-        err instanceof Error ? err.message : "Failed to generate QR code"
+        error instanceof Error ? error.message : "Failed to generate QR code"
       );
     } finally {
       setIsLoading(false);
@@ -107,7 +107,7 @@ export default function DonationPage() {
       try {
         const qr = createQR(qrUrl, 300, "white");
         qr.append(qrRef.current);
-      } catch (err) {
+      } catch (error) {
         setError("Failed to create QR code");
       }
     }
@@ -138,8 +138,8 @@ export default function DonationPage() {
             Support Islamic causes through blockchain technology
           </p>
           <p className="text-sm text-white/60">
-            "The believer's shade on the Day of Resurrection will be their
-            charity" - Prophet Muhammad ﷺ
+            &ldquo;The believer&apos;s shade on the Day of Resurrection will be
+            their charity&rdquo; - Prophet Muhammad ﷺ
           </p>
         </div>
 
@@ -214,9 +214,9 @@ export default function DonationPage() {
             {/* Islamic Quote */}
             <div className="p-4 bg-white/5 border border-white/20 rounded-lg">
               <p className="text-sm text-white/80 italic">
-                "Whoever relieves a Muslim of a burden from the burdens of the
-                world, Allah will relieve him of a burden from the burdens on
-                the Day of Judgment."
+                &ldquo;Whoever relieves a Muslim of a burden from the burdens of
+                the world, Allah will relieve him of a burden from the burdens
+                on the Day of Judgment.&rdquo;
               </p>
               <p className="text-xs text-white/60 mt-1">
                 - Hadith Sahih Muslim

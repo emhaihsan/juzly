@@ -100,8 +100,7 @@ export async function userHasJuzTokenAccount(userPublicKey: PublicKey): Promise<
  */
 export function calculateReadingRewards(
   timeSpentMinutes: number, 
-  pageNumber: number,
-  streakDays: number = 0
+  pageNumber: number
 ): number {
   // Simple reward: 0.05 JUZ per page completed
   // Convert to lamports (6 decimals): 0.05 * 1,000,000 = 50,000
