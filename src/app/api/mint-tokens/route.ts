@@ -2,13 +2,22 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Connection, Keypair, PublicKey, clusterApiUrl } from '@solana/web3.js';
 import { getOrCreateAssociatedTokenAccount, mintTo, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { getJuzMintAddress, parseJuzTokenAmount } from '@/lib/deployment-config';
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
 
-// Load mint authority keypair from file system
+// Load mint authority keypair from environment variable or file system
 function loadMintAuthority(): Keypair {
   try {
+    // First try to load from environment variable (for production)
+    const privateKeyEnv = process.env.SOLANA_PRIVATE_KEY;
+    if (privateKeyEnv) {
+      const secretKey = Uint8Array.from(JSON.parse(privateKeyEnv));
+      return Keypair.fromSecretKey(secretKey);
+    }
+
+    // Fallback to local file system (for development)
+    const fs = require('fs');
+    const os = require('os');
+    const path = require('path');
+    
     const keypairPath = process.env.SOLANA_KEYPAIR_PATH || 
       path.join(os.homedir(), '.config/solana/id.json');
     
