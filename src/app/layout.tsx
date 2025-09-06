@@ -22,7 +22,7 @@ const amiri = Amiri({
 });
 
 export const metadata: Metadata = {
-  title: "Juzly - Read the Quran with Rewards on Blockchain",
+  title: "Juzly",
   description:
     "Web3-based Alquran app with read-to-earn concept. Make yourself a super app for the future.",
   icons: {
