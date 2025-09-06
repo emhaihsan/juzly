@@ -22,9 +22,14 @@ const amiri = Amiri({
 });
 
 export const metadata: Metadata = {
-  title: "Juzly - Baca Quran dengan Reward di Blockchain",
+  title: "Juzly - Read the Quran with Rewards on Blockchain",
   description:
-    "Aplikasi baca Alquran web3 berbasis Solana dengan konsep read to earn. Jadikan Muslim super app untuk masa depan.",
+    "Web3-based Alquran app with read-to-earn concept. Make yourself a super app for the future.",
+  icons: {
+    icon: "/icon.ico",
+    shortcut: "/icon.ico",
+    apple: "/icon.ico",
+  },
 };
 
 export default function RootLayout({
