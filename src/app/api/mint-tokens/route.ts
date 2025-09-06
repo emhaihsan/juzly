@@ -48,10 +48,16 @@ export async function POST(request: NextRequest) {
     
     // Load mint authority
     const mintAuthority = await loadMintAuthority();
+    if (!mintAuthority || !mintAuthority.publicKey) {
+      throw new Error('Failed to load mint authority keypair');
+    }
     console.log('🔑 Mint Authority:', mintAuthority.publicKey.toString());
 
     // Get mint address
     const mintAddress = getJuzMintAddress();
+    if (!mintAddress) {
+      throw new Error('Failed to get mint address');
+    }
     console.log('🪙 Mint Address:', mintAddress.toString());
 
     // Convert user wallet string to PublicKey
@@ -66,6 +72,9 @@ export async function POST(request: NextRequest) {
       userPublicKey
     );
 
+    if (!userTokenAccount || !userTokenAccount.address) {
+      throw new Error('Failed to create or get user token account');
+    }
     console.log('📦 User Token Account:', userTokenAccount.address.toString());
 
     // Convert amount to token units with proper decimals
@@ -84,6 +93,10 @@ export async function POST(request: NextRequest) {
       undefined,
       TOKEN_PROGRAM_ID
     );
+
+    if (!signature) {
+      throw new Error('Minting transaction failed - no signature returned');
+    }
 
     console.log('✅ REAL MINTING SUCCESS! Transaction:', signature);
 
@@ -116,7 +129,14 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   try {
     const mintAuthority = await loadMintAuthority();
+    if (!mintAuthority || !mintAuthority.publicKey) {
+      throw new Error('Failed to load mint authority keypair');
+    }
+    
     const mintAddress = getJuzMintAddress();
+    if (!mintAddress) {
+      throw new Error('Failed to get mint address');
+    }
     
     return NextResponse.json({
       status: 'JUZ Token Minting API Ready',
