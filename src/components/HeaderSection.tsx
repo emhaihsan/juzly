@@ -53,7 +53,7 @@ function formatHijriEN(date: Date) {
 function parseTimeToDate(time: string, base: Date) {
   const match = time.match(/(\d{1,2}):(\d{2})/);
   if (!match) return null;
-  const [_, hStr, mStr] = match;
+  const [, hStr, mStr] = match;
   const d = new Date(base);
   d.setHours(parseInt(hStr, 10), parseInt(mStr, 10), 0, 0);
   return d;

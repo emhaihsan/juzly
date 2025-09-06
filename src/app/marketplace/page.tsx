@@ -65,7 +65,7 @@ export default function MarketplacePage() {
       // Removed setMockJuzBalance call as it's not needed with real blockchain balance
 
       alert(`Successfully redeemed! Transaction ID: redemption_${Date.now()}`);
-    } catch (error) {
+    } catch {
       alert("Redemption failed. Please try again.");
     } finally {
       setRedeeming(null);

@@ -22,7 +22,7 @@ export default function Home() {
                 <span className="text-white/60">.</span>GROW
               </h1>
               <p className="text-xl md:text-2xl text-white/80 mb-8 max-w-3xl mx-auto leading-relaxed">
-                Not just your regular Quran app
+                Earn JUZ tokens by reading the Quran
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <Link

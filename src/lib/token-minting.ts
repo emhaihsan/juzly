@@ -105,7 +105,7 @@ export async function simulateReadingReward(
       activity
     };
     
-  } catch (error) {
+  } catch {
     return {
       success: false,
       message: 'Failed to process reward',

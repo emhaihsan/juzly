@@ -107,7 +107,7 @@ export default function DonationPage() {
       try {
         const qr = createQR(qrUrl, 300, "white");
         qr.append(qrRef.current);
-      } catch (error) {
+      } catch {
         setError("Failed to create QR code");
       }
     }

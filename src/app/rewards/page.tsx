@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useWeb3AuthConnect } from "@web3auth/modal/react";
 import { useSolanaWallet } from "@web3auth/modal/react/solana";
@@ -9,13 +9,63 @@ import { getUserJuzBalance } from "@/lib/juz-token";
 const LS_BALANCES = "r2e_balances";
 const LS_MINTING_HISTORY = "r2e_minting_history"; // Track actual blockchain mints
 
+// Notification component for successful minting
+function MintingNotification({
+  transaction,
+  amount,
+  explorerUrl,
+  onClose,
+}: {
+  transaction: string;
+  amount: number;
+  explorerUrl: string;
+  onClose: () => void;
+}) {
+  return (
+    <div className="fixed top-4 right-4 z-50 max-w-sm bg-green-500/20 border border-green-500/50 rounded-lg p-4 text-white shadow-lg">
+      <div className="flex items-start justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <div className="text-green-400 text-xl">🎉</div>
+          <div className="font-semibold">Minting Successful!</div>
+        </div>
+        <button
+          onClick={onClose}
+          className="text-white/60 hover:text-white text-lg leading-none"
+        >
+          ×
+        </button>
+      </div>
+      <div className="space-y-2 text-sm">
+        <div>
+          <span className="text-white/80">Amount:</span>{" "}
+          <span className="font-semibold text-green-400">{amount} JUZ</span>
+        </div>
+        <div>
+          <span className="text-white/80">Transaction:</span>
+          <div className="font-mono text-xs text-white/90 break-all">
+            {transaction}
+          </div>
+        </div>
+        <a
+          href={explorerUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 bg-green-500 hover:bg-green-400 text-black px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
+        >
+          View on Explorer 🔗
+        </a>
+      </div>
+    </div>
+  );
+}
+
 function useBalance(pubkey: string | null) {
   const [bal, setBal] = useState<number>(0);
-  const refresh = () => {
+  const refresh = useCallback(() => {
     const raw = localStorage.getItem(LS_BALANCES);
     const map = raw ? (JSON.parse(raw) as Record<string, number>) : {};
     setBal(pubkey ? map[pubkey] || 0 : 0);
-  };
+  }, [pubkey]);
   useEffect(() => {
     refresh();
   }, [pubkey, refresh]);
@@ -55,6 +105,12 @@ export default function RewardsPage() {
   const [mintingHistory, setMintingHistory] = useState<
     Array<{ tx: string; amount: number; ts: number }>
   >([]);
+  const [showMintingNotification, setShowMintingNotification] = useState(false);
+  const [mintingNotificationData, setMintingNotificationData] = useState<{
+    transaction: string;
+    amount: number;
+    explorerUrl: string;
+  } | null>(null);
 
   useEffect(() => {
     setMintingHistory(getMintingHistory());
@@ -133,13 +189,12 @@ export default function RewardsPage() {
         });
         setMintingHistory(getMintingHistory());
 
-        alert(
-          `🎉 REAL BLOCKCHAIN MINTING SUCCESS! 🎉\n\n` +
-            `✅ Minted: ${result.amount} JUZ tokens\n` +
-            `⛓️ Transaction: ${result.signature.slice(0, 8)}...\n` +
-            `🌐 View on Explorer: ${result.explorerUrl}\n\n` +
-            `Your tokens are now on Solana blockchain!`
-        );
+        setMintingNotificationData({
+          transaction: result.signature,
+          amount: result.amount,
+          explorerUrl: result.explorerUrl,
+        });
+        setShowMintingNotification(true);
       } else {
         throw new Error("Minting API returned failure");
       }
@@ -172,6 +227,14 @@ export default function RewardsPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      {showMintingNotification && mintingNotificationData && (
+        <MintingNotification
+          transaction={mintingNotificationData.transaction}
+          amount={mintingNotificationData.amount}
+          explorerUrl={mintingNotificationData.explorerUrl}
+          onClose={() => setShowMintingNotification(false)}
+        />
+      )}
       <main className="mx-auto max-w-6xl px-4 py-6 sm:py-10 space-y-6">
         <div className="flex items-center justify-between">
           <div>

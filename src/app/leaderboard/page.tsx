@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useWeb3AuthConnect } from "@web3auth/modal/react";
 import { useSolanaWallet } from "@web3auth/modal/react/solana";
 
 const LS_BALANCES = "r2e_balances";
@@ -62,7 +61,6 @@ function getNFTAchievements(pagesRead: number): string[] {
 }
 
 export default function LeaderboardPage() {
-  const { isConnected } = useWeb3AuthConnect();
   const { accounts } = useSolanaWallet();
   const pubkey = accounts?.[0] || null;
 

@@ -4,19 +4,11 @@ import { useWeb3AuthConnect } from "@web3auth/modal/react";
 import { useSolanaWallet } from "@web3auth/modal/react/solana";
 import Link from "next/link";
 
-const LS_PROGRESS_PREFIX = "r2e_progress_"; // per day
 const LS_BALANCES = "r2e_balances"; // map pubkey->points
 const LS_HISTORY = "r2e_history"; // array of {ts, minutes, page, note}
 const LS_PAGES_READ = "r2e_pages_read"; // map pubkey->array of completed pages
 const LS_WEEKLY_PROGRESS = "r2e_weekly_progress"; // weekly reading tracking
 const LS_MONTHLY_PROGRESS = "r2e_monthly_progress"; // monthly reading tracking
-
-function todayKey() {
-  const d = new Date();
-  return `${d.getFullYear()}-${(d.getMonth() + 1)
-    .toString()
-    .padStart(2, "0")}-${d.getDate().toString().padStart(2, "0")}`;
-}
 
 function getWeekKey() {
   const d = new Date();
@@ -30,15 +22,6 @@ function getWeekKey() {
 function getMonthKey() {
   const d = new Date();
   return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, "0")}`;
-}
-
-function getProgress(): number {
-  const raw = localStorage.getItem(LS_PROGRESS_PREFIX + todayKey());
-  return raw ? Number(raw) || 0 : 0;
-}
-
-function setProgress(v: number) {
-  localStorage.setItem(LS_PROGRESS_PREFIX + todayKey(), String(v));
 }
 
 function getBalance(pubkey: string): number {

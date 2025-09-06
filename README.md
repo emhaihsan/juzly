@@ -1,72 +1,116 @@
-# 🌙 Juzly - Read-to-Earn Islamic Platform
+# 🌙 Juzly - Web3-Based Quran Reading Platform
 
-> Revolutionary blockchain platform connecting Islamic spirituality with Web3 rewards
+> Revolutionary read-to-earn Islamic platform built with Web3Auth and Solana blockchain
 
-## ✨ Overview
+## 🎯 Project Goals
 
-Juzly is an innovative read-to-earn platform that rewards users with JUZ tokens for reading the Holy Quran. Built on Solana blockchain with Web3Auth integration, it combines Islamic spirituality with modern Web3 technology to create a meaningful and rewarding reading experience.
+**Juzly** aims to revolutionize Islamic digital experiences by combining spiritual practice with Web3 technology. Our core mission is to:
 
-## 🚀 Features
+- **Incentivize Quran Reading**: Create a reward system that encourages consistent Quran reading habits
+- **Bridge Web2 to Web3**: Provide seamless wallet onboarding for users new to blockchain technology
+- **Build Islamic Web3 Community**: Foster a global community of Muslims engaging with blockchain technology
+- **Demonstrate Real Utility**: Show practical Web3 applications beyond speculation and trading
+- **Preserve Islamic Values**: Maintain respect for religious content while innovating with technology
 
-- **📖 Quran Reading**: Clean, distraction-free interface for reading the Holy Quran
-- **🪙 JUZ Token Rewards**: Earn blockchain tokens for completed reading sessions
-- **⏱️ Smart Reading Timer**: Enforces minimum reading times (30s-60s per page)
-- **🏆 Active Leaderboard**: Weekly, monthly, and all-time rankings
-- **🎨 NFT Achievements**: Milestone NFTs for reading accomplishments
-- **🛍️ Marketplace**: Redeem JUZ tokens for Islamic merchandise
-- **🔗 Web3 Integration**: Solana wallet connectivity via Web3Auth
+## ✨ Key Features
 
-## 🎯 Reward System
+### 🔗 Web3 Integration
 
-### Reading Rewards
+- **Seamless Wallet Connection**: One-click wallet creation and login via Web3Auth
+- **Real Token Rewards**: Earn JUZ tokens (SPL tokens) minted directly to your Solana wallet
+- **Blockchain Transparency**: All transactions and rewards are verifiable on Solana blockchain
+- **Cross-Platform Compatibility**: Works with any Solana-compatible wallet
 
-- **Per Page**: 0.050000 JUZ (1/20 token per page)
-- **Time Requirements**: 30 seconds (pages 1-2), 60 seconds (pages 3+)
-- **Full Juz**: 1.000 JUZ for completing 20 pages
-- **Special Bonuses**: +0.5 - 1.0 JUZ for Al-Fatihah & completion
-- **Daily Limit**: 20 minutes maximum per day
+### 📖 Reading Experience
 
-### NFT Achievements
+- **Interactive Quran Reader**: Clean, distraction-free interface for reading Holy Quran
+- **Smart Timer System**: Enforces minimum reading times to ensure meaningful engagement
+- **Progress Tracking**: Track daily, weekly, and monthly reading progress
+- **Achievement System**: Unlock NFT badges for reading milestones
 
-- 🥉 **First Week**: 7 pages read
-- 🥈 **Monthly Reader**: 30 pages read
-- 🥇 **Century Club**: 100 pages read
-- 💎 **Diamond Reader**: 300 pages read
-- 👑 **Quran Complete**: 604 pages read
-- 🏆 **Top Rankings**: Weekly/Monthly Top 3
+### 🏆 Gamification (Todo)
 
-## 🛠️ Tech Stack
+- **Live Leaderboards**: Weekly, monthly, and all-time rankings
+- **Token Economy**: Earn 0.05 JUZ tokens per page completed
+- **NFT Achievements**: Special badges for milestones (First Week, Century Club, etc.)
+- **Marketplace**: Redeem tokens for Islamic merchandise and digital goods
 
-- **Frontend**: Next.js 15, React 18, TypeScript
-- **Styling**: Tailwind CSS
-- **Blockchain**: Solana (Devnet)
-- **Wallet**: Web3Auth Modal
-- **Token Standard**: SPL Token (JUZ)
-- **NFTs**: Metaplex Token Metadata
-- **API**: Al-Quran Cloud API
+## 🔐 Web3Auth Integration
 
-## 🏁 Getting Started
+**Key Integration Points:**
+
+1. **Wallet Creation**: Users can create Solana wallets using social logins (Google, Facebook, etc.)
+2. **Seamless Authentication**: No seed phrases or complex wallet setup required
+3. **Transaction Signing**: Automatic transaction signing for token minting and transfers
+4. **Balance Management**: Real-time display of both pending rewards and blockchain balances
+
+**Web3Auth Benefits:**
+
+- **User-Friendly**: Familiar social login experience
+- **Cross-Platform**: Works on web, mobile, and desktop
+- **Developer-Friendly**: Simple SDK integration with comprehensive documentation
+
+### Blockchain Architecture
+
+```
+User Reading Session → Local Reward Accumulation → Mint to Blockchain
+                                                 ↓
+                               Solana SPL Token (JUZ) → User's Wallet
+```
+
+## 🚀 Running the Demo
 
 ### Prerequisites
 
-- Node.js 18+
-- npm, yarn, pnpm, or bun
+- **Node.js 18+** (Download from [nodejs.org](https://nodejs.org/))
+- **Package Manager**: npm, yarn, pnpm, or bun
+- **Web3Auth Account**: Free account at [Web3Auth Dashboard](https://dashboard.web3auth.io/)
 
-### Installation
+### Step 1: Environment Setup
+
+1. **Clone the repository:**
 
 ```bash
-# Clone the repository
 git clone https://github.com/emhaihsan/juzly.git
 cd juzly
+```
 
-# Install dependencies
+2. **Install dependencies:**
+
+```bash
 npm install
 # or
 yarn install
 # or
 pnpm install
+```
 
-# Run development server
+3. **Configure Web3Auth:**
+
+   - Visit [Web3Auth Dashboard](https://dashboard.web3auth.io/)
+   - Create a new project
+   - Select "Solana" as the blockchain
+   - Add `http://localhost:3000` to allowed origins
+   - Copy your Client ID
+
+4. **Create environment file:**
+
+```bash
+# Create .env.local file
+cp .env.example .env.local
+```
+
+5. **Add your Web3Auth credentials to `.env.local`:**
+
+```env
+NEXT_PUBLIC_WEB3AUTH_CLIENT_ID=your_web3auth_client_id_here
+NEXT_PUBLIC_SOLANA_RPC_URL=https://api.devnet.solana.com
+```
+
+### Step 2: Run the Application
+
+```bash
+# Start development server
 npm run dev
 # or
 yarn dev
@@ -74,79 +118,112 @@ yarn dev
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the application.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## 📁 Project Structure
+### Step 3: Walkthrough
+
+1. **Connect Wallet**:
+
+   - Click "Connect Wallet" in the top navigation
+   - Choose your preferred social login (Google, Facebook, etc.)
+   - Web3Auth will create a Solana wallet for you automatically
+
+2. **Start Reading**:
+
+   - Navigate to "Quran" section
+   - Select any page to start reading
+   - Timer will start automatically (30-60 seconds minimum per page)
+   - Complete the reading session to earn rewards
+
+3. **Claim Rewards**:
+
+   - Go to "Rewards" page to see your pending JUZ tokens
+   - Click "Mint to Blockchain" to convert local rewards to real tokens
+   - Tokens will be minted directly to your Solana wallet
+
+4. **Check Leaderboard (Todo)**:
+
+   - Visit "Leaderboard" to see your ranking
+   - View weekly, monthly, and all-time statistics
+   - See achievement badges earned by you and other users
+
+5. **Use Marketplace (Todo)**:
+   - Browse "Marketplace" for available items
+   - Redeem JUZ tokens for Islamic merchandise
+   - Transactions are processed on Solana blockchain
+
+### Step 4: Verify on Blockchain
+
+- **View Tokens**: Check your wallet balance in any Solana wallet app
+- **Transaction History**: All minting and transfers are visible on [Solscan](https://solscan.io/) (Devnet)
+- **Token Details**: JUZ token contract and metadata are verifiable on-chain
+
+## 🛠️ Technical Architecture
+
+### Frontend Stack
+
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript for type safety
+- **Styling**: Tailwind CSS for responsive design
+- **State Management**: React hooks and localStorage
+
+### Blockchain Integration
+
+- **Network**: Solana Devnet (easily switchable to Mainnet)
+- **Wallet**: Web3Auth Modal SDK
+- **Token Standard**: SPL Token (JUZ)
+- **RPC**: Solana Web3.js for blockchain interactions
+
+### Key Components
 
 ```
 src/
-├── app/                    # Next.js App Router pages
-│   ├── leaderboard/       # Active leaderboard with rankings
-│   ├── marketplace/       # JUZ token redemption store
-│   ├── quran/            # Quran reading interface
-│   │   └── mushaf/       # Individual page reader
-│   └── rewards/          # User rewards dashboard
-├── components/            # Reusable React components
-│   └── providers/        # Web3Auth providers
-└── lib/                  # Utility functions and configs
+├── app/                    # Next.js pages and API routes
+│   ├── api/mint-tokens/   # Token minting API endpoint
+│   ├── quran/             # Quran reading interface
+│   ├── rewards/           # Rewards dashboard with Web3Auth
+│   └── leaderboard/       # Community rankings
+├── components/            # Reusable UI components
+├── lib/                   # Blockchain utilities and token logic
+└── web3authContext.ts     # Web3Auth configuration and providers
 ```
 
-## 🔧 Configuration
+## 🎮 Features
 
-### Environment Variables
+### Blockchain Integration
 
-Create a `.env.local` file:
+- ✅ **Actual Token Minting**: JUZ tokens are real SPL tokens on Solana
+- ✅ **Wallet Integration**: Full Web3Auth wallet functionality
+- ✅ **Transaction Verification**: All actions are blockchain-verifiable
+- ✅ **Cross-Wallet Compatibility**: Works with Phantom, Solflare, etc.
 
-```env
-NEXT_PUBLIC_WEB3AUTH_CLIENT_ID=your_web3auth_client_id
-NEXT_PUBLIC_SOLANA_RPC_URL=https://api.devnet.solana.com
-```
+### User Experience
 
-### Web3Auth Setup
+- ✅ **Zero Web3 Knowledge Required**: Social login handles complexity
+- ✅ **Instant Onboarding**: No seed phrases or wallet downloads
+- ✅ **Real-Time Updates**: Live balance and transaction notifications
+- ✅ **Mobile Responsive**: Works on all devices
 
-1. Create account at [Web3Auth Dashboard](https://dashboard.web3auth.io/)
-2. Create new project for Solana
-3. Add your domain to allowed origins
-4. Copy Client ID to environment variables
+### Islamic Content Integration
 
-## 🎮 Usage
+- ✅ **Authentic Quran Text**: Sourced from Al-Quran Cloud API
+- ✅ **Respectful Implementation**: Maintains Islamic values and etiquette
+- ✅ **Community Building**: Leaderboards foster healthy competition
+- ✅ **Educational Value**: Encourages consistent Quran reading
 
-1. **Connect Wallet**: Use Web3Auth to connect Solana wallet
-2. **Start Reading**: Navigate to Quran section and select Juz/page
-3. **Earn Rewards**: Complete reading sessions to earn JUZ tokens
-4. **Check Rankings**: View your position on active leaderboard
-5. **Redeem Rewards**: Use marketplace to exchange tokens for merchandise
-6. **Collect NFTs**: Achieve milestones to earn special NFTs
+## 📞 Support & Contact
 
-## 🏆 Hackathon Information
-
-Built for the **MetaMask Embedded Wallets Dev Cook-Off** hackathon, demonstrating:
-
-- Innovative Web3 use case in Islamic tech
-- Comprehensive read-to-earn mechanics
-- Real blockchain token rewards
-- NFT achievement system
-- Active community leaderboards
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- **GitHub**: [github.com/emhaihsan/juzly](https://github.com/emhaihsan/juzly)
+- **Documentation**: This README and inline code comments
+- **Issues**: Use GitHub Issues for bug reports and feature requests
 
 ## 🙏 Acknowledgments
 
-- [Al-Quran Cloud API](https://alquran.cloud/) for Quran text data
-- [Web3Auth](https://web3auth.io/) for seamless wallet integration
-- [Solana Labs](https://solanalabs.com/) for blockchain infrastructure
-- [Metaplex](https://www.metaplex.com/) for NFT standards
+- **Web3Auth Team**: For providing seamless wallet infrastructure
+- **Solana Labs**: For fast and affordable blockchain platform
+- **Al-Quran Cloud**: For authentic Quran text API
+- **Muslim Developer Community**: For inspiration and feedback
 
 ---
 
-**Made with ❤️ for the global Muslim community**
+**🌙 Made with ❤️ for the global Muslim community and Web3 adoption**
