@@ -4,7 +4,7 @@ import { getOrCreateAssociatedTokenAccount, mintTo, TOKEN_PROGRAM_ID } from '@so
 import { getJuzMintAddress, parseJuzTokenAmount } from '@/lib/deployment-config';
 
 // Load mint authority keypair from environment variable or file system
-function loadMintAuthority(): Keypair {
+async function loadMintAuthority(): Promise<Keypair> {
   try {
     // First try to load from environment variable (for production)
     const privateKeyEnv = process.env.SOLANA_PRIVATE_KEY;
@@ -14,9 +14,10 @@ function loadMintAuthority(): Keypair {
     }
 
     // Fallback to local file system (for development)
-    const fs = require('fs');
-    const os = require('os');
-    const path = require('path');
+    // Use dynamic imports to avoid ESLint errors
+    const fs = await import('fs');
+    const os = await import('os');
+    const path = await import('path');
     
     const keypairPath = process.env.SOLANA_KEYPAIR_PATH || 
       path.join(os.homedir(), '.config/solana/id.json');
@@ -46,7 +47,7 @@ export async function POST(request: NextRequest) {
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
     
     // Load mint authority
-    const mintAuthority = loadMintAuthority();
+    const mintAuthority = await loadMintAuthority();
     console.log('🔑 Mint Authority:', mintAuthority.publicKey.toString());
 
     // Get mint address
@@ -114,7 +115,7 @@ export async function POST(request: NextRequest) {
 // Also handle GET for testing
 export async function GET() {
   try {
-    const mintAuthority = loadMintAuthority();
+    const mintAuthority = await loadMintAuthority();
     const mintAddress = getJuzMintAddress();
     
     return NextResponse.json({
