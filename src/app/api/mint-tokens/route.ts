@@ -11,18 +11,56 @@ async function loadMintAuthority(): Promise<Keypair> {
     // First try to load from environment variable (for production)
     const privateKeyEnv = process.env.SOLANA_PRIVATE_KEY;
     console.log('🔍 Environment variable SOLANA_PRIVATE_KEY exists:', !!privateKeyEnv);
+    console.log('🔍 Environment variable length:', privateKeyEnv?.length || 0);
     
     if (privateKeyEnv) {
       console.log('🔍 Using environment variable for mint authority');
       try {
-        const secretKey = Uint8Array.from(JSON.parse(privateKeyEnv));
+        // Validate that it's a proper JSON array format
+        if (!privateKeyEnv.startsWith('[') || !privateKeyEnv.endsWith(']')) {
+          throw new Error('Private key must be a JSON array format: [1,2,3,...]');
+        }
+        
+        console.log('🔍 Parsing private key JSON...');
+        const parsedArray = JSON.parse(privateKeyEnv);
+        
+        // Validate it's an array
+        if (!Array.isArray(parsedArray)) {
+          throw new Error('Private key must be an array of numbers');
+        }
+        
+        // Validate array length (should be 64 bytes for Solana)
+        if (parsedArray.length !== 64) {
+          throw new Error(`Private key array must be 64 bytes, got ${parsedArray.length}`);
+        }
+        
+        // Validate all elements are numbers between 0-255
+        for (let i = 0; i < parsedArray.length; i++) {
+          const byte = parsedArray[i];
+          if (typeof byte !== 'number' || byte < 0 || byte > 255 || !Number.isInteger(byte)) {
+            throw new Error(`Invalid byte at index ${i}: ${byte}. Must be integer 0-255`);
+          }
+        }
+        
+        console.log('🔍 Converting to Uint8Array...');
+        const secretKey = new Uint8Array(parsedArray);
         console.log('🔍 Secret key length:', secretKey.length);
+        
+        console.log('🔍 Creating keypair from secret key...');
         const keypair = Keypair.fromSecretKey(secretKey);
+        
+        // Validate keypair was created successfully
+        if (!keypair || !keypair.publicKey) {
+          throw new Error('Failed to create valid keypair from secret key');
+        }
+        
         console.log('✅ Successfully loaded keypair from environment');
+        console.log('🔑 Public key:', keypair.publicKey?.toString() || 'undefined');
         return keypair;
       } catch (envError) {
         console.error('❌ Error parsing environment variable:', envError);
-        throw new Error(`Failed to parse SOLANA_PRIVATE_KEY: ${envError}`);
+        console.error('❌ Raw environment variable:', privateKeyEnv?.substring(0, 50) + '...');
+        throw new Error(`Failed to parse SOLANA_PRIVATE_KEY: ${envError instanceof Error ? envError.message : envError}`);
       }
     }
 
@@ -38,24 +76,53 @@ async function loadMintAuthority(): Promise<Keypair> {
     console.log('🔍 Keypair path:', keypairPath);
     
     try {
-      const secretKey = Uint8Array.from(
-        JSON.parse(fs.readFileSync(keypairPath, 'utf8'))
-      );
+      // Check if file exists
+      if (!fs.existsSync(keypairPath)) {
+        throw new Error(`Keypair file does not exist: ${keypairPath}`);
+      }
+      
+      console.log('🔍 Reading keypair file...');
+      const fileContent = fs.readFileSync(keypairPath, 'utf8');
+      console.log('🔍 File content length:', fileContent.length);
+      
+      const parsedArray = JSON.parse(fileContent);
+      
+      // Validate it's an array
+      if (!Array.isArray(parsedArray)) {
+        throw new Error('Keypair file must contain an array of numbers');
+      }
+      
+      // Validate array length
+      if (parsedArray.length !== 64) {
+        throw new Error(`Keypair file array must be 64 bytes, got ${parsedArray.length}`);
+      }
+      
+      const secretKey = new Uint8Array(parsedArray);
       console.log('🔍 Secret key length from file:', secretKey.length);
+      
       const keypair = Keypair.fromSecretKey(secretKey);
+      
+      // Validate keypair
+      if (!keypair || !keypair.publicKey) {
+        throw new Error('Failed to create valid keypair from file');
+      }
+      
       console.log('✅ Successfully loaded keypair from file');
+      console.log('🔑 Public key:', keypair.publicKey?.toString() || 'undefined');
       return keypair;
     } catch (fileError) {
       console.error('❌ Error reading keypair file:', fileError);
-      throw new Error(`Failed to read keypair file: ${fileError}`);
+      throw new Error(`Failed to read keypair file: ${fileError instanceof Error ? fileError.message : fileError}`);
     }
   } catch (error) {
     console.error('❌ FULL ERROR in loadMintAuthority:', {
       message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : 'No stack trace',
-      error: error
+      error: error,
+      env_exists: !!process.env.SOLANA_PRIVATE_KEY,
+      env_length: process.env.SOLANA_PRIVATE_KEY?.length || 0
     });
-    throw new Error(`Failed to load mint authority: ${error}`);
+    throw new Error(`Failed to load mint authority: ${error instanceof Error ? error.message : error}`);
   }
 }
 
@@ -87,7 +154,7 @@ export async function POST(request: NextRequest) {
       console.error('❌ Mint authority is null or missing publicKey');
       throw new Error('Failed to load mint authority keypair');
     }
-    console.log('🔑 Mint Authority:', mintAuthority.publicKey.toString());
+    console.log('🔑 Mint Authority:', mintAuthority.publicKey?.toString() || 'undefined');
 
     // Get mint address
     console.log('🪙 Getting mint address...');
@@ -96,12 +163,15 @@ export async function POST(request: NextRequest) {
       console.error('❌ Mint address is null');
       throw new Error('Failed to get mint address');
     }
-    console.log('🪙 Mint Address:', mintAddress.toString());
+    console.log('🪙 Mint Address:', mintAddress?.toString() || 'undefined');
 
     // Convert user wallet string to PublicKey
     console.log('👤 Converting user wallet to PublicKey...');
+    if (!userWallet || typeof userWallet !== 'string') {
+      throw new Error('Invalid user wallet address');
+    }
     const userPublicKey = new PublicKey(userWallet);
-    console.log('👤 User Wallet:', userPublicKey.toString());
+    console.log('👤 User Wallet:', userPublicKey?.toString() || 'undefined');
 
     // Get or create user's token account
     console.log('📦 Getting or creating user token account...');
@@ -116,7 +186,7 @@ export async function POST(request: NextRequest) {
       console.error('❌ User token account is null or missing address');
       throw new Error('Failed to create or get user token account');
     }
-    console.log('📦 User Token Account:', userTokenAccount.address.toString());
+    console.log('📦 User Token Account:', userTokenAccount.address?.toString() || 'undefined');
 
     // Convert amount to token units with proper decimals
     console.log('💰 Converting amount to token units...');
@@ -150,8 +220,8 @@ export async function POST(request: NextRequest) {
       signature,
       amount,
       tokenAmount,
-      userTokenAccount: userTokenAccount.address.toString(),
-      mintAddress: mintAddress.toString(),
+      userTokenAccount: userTokenAccount.address?.toString() || 'undefined',
+      mintAddress: mintAddress?.toString() || 'undefined',
       explorerUrl: `https://explorer.solana.com/tx/${signature}?cluster=devnet`,
       message: `Successfully minted ${amount} JUZ tokens to your wallet!`
     };
@@ -197,8 +267,8 @@ export async function GET() {
     
     const response = {
       status: 'JUZ Token Minting API Ready',
-      mintAddress: mintAddress.toString(),
-      mintAuthority: mintAuthority.publicKey.toString(),
+      mintAddress: mintAddress?.toString() || 'undefined',
+      mintAuthority: mintAuthority.publicKey?.toString() || 'undefined',
       network: 'devnet',
       ready: true,
       timestamp: new Date().toISOString()
