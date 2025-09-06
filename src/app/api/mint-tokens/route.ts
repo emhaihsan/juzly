@@ -16,13 +16,19 @@ async function loadMintAuthority(): Promise<Keypair> {
     if (privateKeyEnv) {
       console.log('🔍 Using environment variable for mint authority');
       try {
-        // Validate that it's a proper JSON array format
-        if (!privateKeyEnv.startsWith('[') || !privateKeyEnv.endsWith(']')) {
-          throw new Error('Private key must be a JSON array format: [1,2,3,...]');
+        // Clean and trim the environment variable
+        const cleanedPrivateKey = privateKeyEnv.trim();
+        console.log('🔍 Cleaned private key length:', cleanedPrivateKey.length);
+        console.log('🔍 First 20 chars:', cleanedPrivateKey.substring(0, 20));
+        console.log('🔍 Last 20 chars:', cleanedPrivateKey.substring(cleanedPrivateKey.length - 20));
+        
+        // More flexible validation - check if it looks like a JSON array
+        if (!cleanedPrivateKey.includes('[') || !cleanedPrivateKey.includes(']')) {
+          throw new Error('Private key must contain JSON array brackets [ ]');
         }
         
         console.log('🔍 Parsing private key JSON...');
-        const parsedArray = JSON.parse(privateKeyEnv);
+        const parsedArray = JSON.parse(cleanedPrivateKey);
         
         // Validate it's an array
         if (!Array.isArray(parsedArray)) {
@@ -59,7 +65,7 @@ async function loadMintAuthority(): Promise<Keypair> {
         return keypair;
       } catch (envError) {
         console.error('❌ Error parsing environment variable:', envError);
-        console.error('❌ Raw environment variable:', privateKeyEnv?.substring(0, 50) + '...');
+        console.error('❌ Raw environment variable (first 100 chars):', privateKeyEnv?.substring(0, 100));
         throw new Error(`Failed to parse SOLANA_PRIVATE_KEY: ${envError instanceof Error ? envError.message : envError}`);
       }
     }
