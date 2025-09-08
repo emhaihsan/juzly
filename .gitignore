@@ -44,3 +44,4 @@ DEPLOYMENT.md
 deploy.txt
 juz-deployment-config.json
 leaderboard-strategy.md
+scripts/convert-key-to-base64.js
