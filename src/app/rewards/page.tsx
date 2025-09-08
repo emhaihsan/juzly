@@ -143,6 +143,12 @@ export default function RewardsPage() {
     setMinting(true);
     try {
       const rewardAmount = bal / 1_000_000; // Convert to JUZ tokens
+
+      // Add null check for pubkey before creating PublicKey
+      if (!pubkey) {
+        throw new Error("Wallet not connected");
+      }
+
       const publicKey = new PublicKey(pubkey);
 
       console.log(`🪙 REAL MINTING: ${rewardAmount} JUZ tokens to ${pubkey}`);
@@ -159,12 +165,16 @@ export default function RewardsPage() {
       });
 
       const result = await response.json();
+      console.log("🔍 API Response:", result);
 
       if (!response.ok) {
-        throw new Error(result.details || result.error || "Minting failed");
+        const errorMessage =
+          result?.details || result?.error || "Minting failed";
+        console.error("❌ API Error Response:", result);
+        throw new Error(errorMessage);
       }
 
-      if (result.success) {
+      if (result?.success) {
         console.log("✅ REAL BLOCKCHAIN MINTING SUCCESS!");
         console.log("Transaction:", result.signature);
         console.log("Explorer:", result.explorerUrl);
@@ -178,33 +188,44 @@ export default function RewardsPage() {
 
         // Refresh on-chain balance to show new tokens
         await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for blockchain confirmation
-        const newBalance = await getUserJuzBalance(publicKey);
-        setOnChainBalance(newBalance);
+        try {
+          const newBalance = await getUserJuzBalance(publicKey);
+          setOnChainBalance(newBalance);
+        } catch (balanceError) {
+          console.warn("⚠️ Failed to refresh balance:", balanceError);
+        }
 
-        // Add minting record
-        addMintingRecord({
-          tx: result.signature,
-          amount: result.amount,
-          ts: new Date().getTime(),
-        });
-        setMintingHistory(getMintingHistory());
+        // Add minting record with null checks
+        if (result.signature && result.amount) {
+          addMintingRecord({
+            tx: result.signature,
+            amount: result.amount,
+            ts: new Date().getTime(),
+          });
+          setMintingHistory(getMintingHistory());
 
-        setMintingNotificationData({
-          transaction: result.signature,
-          amount: result.amount,
-          explorerUrl: result.explorerUrl,
-        });
-        setShowMintingNotification(true);
+          // Set notification data with null checks
+          if (result.signature && result.explorerUrl) {
+            setMintingNotificationData({
+              transaction: result.signature,
+              amount: result.amount,
+              explorerUrl: result.explorerUrl,
+            });
+            setShowMintingNotification(true);
+          }
+        }
       } else {
-        throw new Error("Minting API returned failure");
+        throw new Error(result?.message || "Minting API returned failure");
       }
     } catch (error) {
       console.error("❌ REAL MINTING FAILED:", error);
-      alert(
-        `❌ Real Blockchain Minting Failed:\n\n${
-          error instanceof Error ? error.message : "Unknown error"
-        }\n\nPlease check console for details.`
-      );
+
+      // Enhanced error message with more context
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      const fullErrorMessage = `❌ Real Blockchain Minting Failed:\n\n${errorMessage}\n\nPlease check console for details.`;
+
+      alert(fullErrorMessage);
     } finally {
       setMinting(false);
     }
